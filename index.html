@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
 </head>
 <body>
-    <input value="Натисни на мене" onclick="alert('Валентино, дякую, що натиснула :)')" type="button">
+    <input id="elem" value="Натисни на мене"  type="button">
+	<script>
+  elem.onclick = function(event) {
+	elem.value = "не натискати"
+    alert('Бендер: ААААА, мене струмом вдарило, написано ж "не натискати"');
+  };
+	</script>
 </body>
 </html>
