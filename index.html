@@ -29,6 +29,7 @@ var brickOffsetTop = 30;
 var brickOffsetLeft = 30;
 var score = 0;
 var lives = 3;
+var isBenderOK = false;	
 
 var bricks = [];
 for(var c=0; c<brickColumnCount; c++) {
@@ -77,7 +78,8 @@ function collisionDetection() {
           score++;
           if(score == brickRowCount*brickColumnCount) {
             alert("Бендер: Мішок з кістками, ти врятувала мене! Дякую, Валентина, переможниця Акрканоідіанців.");
-            //document.location.reload();
+            isBenderOK = true;
+		  document.location.reload();
           }
         }
       }
@@ -128,7 +130,9 @@ function drawLives() {
 }
 
 function draw() {
-  
+  if(isBenderOK){
+	  return;
+  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBricks();
   drawBall();
