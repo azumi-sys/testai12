@@ -76,7 +76,7 @@ function collisionDetection() {
           b.status = 0;
           score++;
           if(score == brickRowCount*brickColumnCount) {
-            alert("Мішок з кістками, ти врятувала мене");
+            alert("Бендер: Мішок з кістками, ти врятувала мене! Дякую, Валентина, переможниця Акрканоїдіанців.");
             document.location.reload();
           }
         }
@@ -150,7 +150,7 @@ function draw() {
     else {
       lives--;
       if(!lives) {
-        alert("О ні, Арканоідіанці розплавлять мене, мішок з кістками, спробуй ще!");
+        alert("Бендер: О ні, Арканоідіанці розплавлять мене, мішок з кістками, спробуй ще!");
         document.location.reload();
       }
       else {
