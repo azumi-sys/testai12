@@ -64,19 +64,19 @@ function update(){
     pen.beginPath();
     pen.font = "30px Arial"
     pen.fillStyle = "white";
-    pen.fillText("Життя: "+lives+" Знищено: "+score,200,25);
+    pen.fillText("Життя: "+lives+" Знищено: "+score,100,25);
     if(score < 5){ 
-      pen.fillText("Бендер: Покажи, чого ти варта",200,50);
+      pen.fillText("Бендер: Покажи, чого ти варта",100,50);
     }else if(score < 10){ 
-      pen.fillText("Бендер: Мішок з кістками, піднажми!",200,50);
+      pen.fillText("Бендер: Мішок з кістками, піднажми!",100,50);
     }else if(score < 20){ 
-      pen.fillText("Бендер: Валентинооооо, ти зможеш!",200,50);
+      pen.fillText("Бендер: Валентинооооо, ти зможеш!",100,50);
     }else if(score < 30){ 
-      pen.fillText("Бендер: Ще половина, не відступай!!",200,50);
+      pen.fillText("Бендер: Ще половина, не відступай!!",100,50);
     }else if(score < 40){
-      pen.fillText("Бендер: Крихітко, ще трішки!",200,50);
+      pen.fillText("Бендер: Крихітко, ще трішки!",100,50);
     }else if(score < 50){ 
-      pen.fillText("Бендер: Давай, хочу тебе на фініші!!!",200,50);
+      pen.fillText("Бендер: Давай, хочу тебе на фініші!!!",100,50);
     };
     pen.fill();
 
@@ -142,20 +142,20 @@ function update(){
     pen.textAlign="center";
     pen.textBaseLine="middle";
     if(score <= 0){
-    pen.fillText("Мішок з кістками, вважай, нас знищили!",300,200);
+    pen.fillText("Мішок з кістками, вважай, нас знищили!",200,200);
     }else if(score <= 10){
-    pen.fillText("Ти там що, заснула?",300,200);
+    pen.fillText("Ти там що, заснула?",200,200);
     }else if(score <= 20){
-    pen.fillText("Мішок з кістками, дивись куди летиш!",300,200);
+    pen.fillText("Мішок з кістками, дивись куди летиш!",200,200);
     }else if(score <= 30){
-    pen.fillText("Валентино спробуй ще!",300,200);
+    pen.fillText("Валентино спробуй ще!",200,200);
     }else{
-    pen.fillText("Давай крихітко, ти можеш краще!",300,200);
+    pen.fillText("Давай крихітко, ти можеш краще!",200,200);
     }
     pen.fillText("Знищено: "+score,300,240)
   }
   if(score >= 50){
-    pen.fillText("Крихітко, ти пройшла підготовку!",300,200); 
+    pen.fillText("Крихітко, ти пройшла підготовку!",200,200); 
   }
 }
 
