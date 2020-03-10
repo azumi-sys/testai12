@@ -64,7 +64,7 @@ function update(){
     pen.beginPath();
     pen.font = "30px Arial"
     pen.fillStyle = "white";
-    pen.fillText("Lives: "+lives+" Score: "+score,350,30);
+    pen.fillText("Життя: "+lives+" Знищено нападників: "+score,350,30);
     pen.fill();
 
     //Create Player 
