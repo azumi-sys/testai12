@@ -73,11 +73,11 @@ function update(){
       pen.fillText("Бендер: Валентинооооо, ти зможеш!",350,50);
     }else if(score < 30){ 
       pen.fillText("Бендер: Ще половина, не відступай!!",350,50);
-    }else if(score < 40){ 
+    }else if(score < 40){
       pen.fillText("Бендер: Крихітко, ще трішки!",350,50);
     }else if(score < 50){ 
       pen.fillText("Бендер: Давай, хочу тебе на фініші!!!",350,50);
-    }
+    };
     pen.fill();
 
     //Create Player 
