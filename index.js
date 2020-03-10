@@ -15,7 +15,7 @@ window.onload = function(){
   document.addEventListener("mousedown", mouseClickHandler, false)
   //Set Images
   spaceship = new Image();
-  spaceship.src = "http://pixelartmaker.com/art/d9c710d4c7e1ae6.png";
+  spaceship.src = "http://pixelartmaker.com/art/dfa18b21ddb32df.png";
   bullet = new Image();
   bullet.src =
   "http://pixelartmaker.com/art/17f45360a19f8e6.png";
