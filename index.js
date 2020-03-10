@@ -64,8 +64,20 @@ function update(){
     pen.beginPath();
     pen.font = "30px Arial"
     pen.fillStyle = "white";
-    pen.fillText("Життя: "+lives+" Знищено: "+score,350,30);
-    pen.fillText("Життя: "+lives+" Знищено: "+score,350,50);
+    pen.fillText("Життя: "+lives+" Знищено: "+score,350,25);
+    if(score < 5){ 
+      pen.fillText("Бендер: Покажи, чого ти варта",350,50);
+    }else if(score < 10){ 
+      pen.fillText("Бендер: Мішок з кістками, піднажми!",350,50);
+    }else if(score < 20){ 
+      pen.fillText("Бендер: Валентинооооо, ти зможеш!",350,50);
+    }else if(score < 30){ 
+      pen.fillText("Бендер: Ще половина, не відступай!!",350,50);
+    }else if(score < 40){ 
+      pen.fillText("Бендер: Крихітко, ще трішки!",350,50);
+    }else if(score < 50){ 
+      pen.fillText("Бендер: Давай, хочу тебе на фініші!!!",350,50);
+    }
     pen.fill();
 
     //Create Player 
