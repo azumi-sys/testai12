@@ -65,6 +65,7 @@ function update(){
     pen.font = "30px Arial"
     pen.fillStyle = "white";
     pen.fillText("Життя: "+lives+" Знищено: "+score,350,30);
+    pen.fillText("Життя: "+lives+" Знищено: "+score,350,50);
     pen.fill();
 
     //Create Player 
@@ -139,7 +140,7 @@ function update(){
     }else{
     pen.fillText("Давай крихітко, ти можеш краще!",300,200);
     }
-    pen.fillText("Score: "+score,300,240)
+    pen.fillText("Знищено: "+score,300,240)
   }
   if(score >= 50){
     pen.fillText("Крихітко, ти пройшла підготовку!",300,200); 
