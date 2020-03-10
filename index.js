@@ -64,7 +64,7 @@ function update(){
     pen.beginPath();
     pen.font = "30px Arial"
     pen.fillStyle = "white";
-    pen.fillText("Життя: "+lives+" Знищено нападників: "+score,350,30);
+    pen.fillText("Життя: "+lives+" Знищено: "+score,350,30);
     pen.fill();
 
     //Create Player 
@@ -128,8 +128,21 @@ function update(){
     pen.fillStyle="red";
     pen.textAlign="center";
     pen.textBaseLine="middle";
-    pen.fillText("GAME OVER",300,200);
+    if(score <= 0){
+    pen.fillText("Мішок з кістками, вважай, нас знищили!",300,200);
+    }else if(score <= 10){
+    pen.fillText("Ти там що, заснула?",300,200);
+    }else if(score <= 20){
+    pen.fillText("Мішок з кістками, дивись куди летиш!",300,200);
+    }else if(score <= 30){
+    pen.fillText("Валентино спробуй ще!",300,200);
+    }else{
+    pen.fillText("Давай крихітко, ти можеш краще!",300,200);
+    }
     pen.fillText("Score: "+score,300,240)
+  }
+  if(score >= 50){
+    pen.fillText("Крихітко, ти пройшла підготовку!",300,200); 
   }
 }
 
