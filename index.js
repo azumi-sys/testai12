@@ -139,6 +139,10 @@ function update(){
     }
   }
   //Type Game Over
+  
+  if(score >= 50){
+    pen.fillText("Крихітко, ти пройшла підготовку!",200,200); 
+  }else
   if(lives <= 0){
     pen.fillStyle="red";
     pen.textAlign="center";
@@ -155,10 +159,7 @@ function update(){
     pen.fillText("Давай крихітко, ти можеш краще!",200,200);
     }
     pen.fillText("Знищено: "+score,300,240)
-  }
-  if(score >= 50){
-    pen.fillText("Крихітко, ти пройшла підготовку!",200,200); 
-  }
+  }  
 }
 
 
