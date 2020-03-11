@@ -142,6 +142,7 @@ function update(){
   
   if(score >= 50){
     pen.fillText("Крихітко, ти пройшла підготовку!",200,200); 
+    pen.fillText("Пароль: Бендер найкращий",200,200); 
   }else
   if(lives <= 0){
     pen.fillStyle="red";
