@@ -143,6 +143,7 @@ function update(){
   if(score >= 50){
     pen.fillText("Крихітко, ти пройшла підготовку!",200,200); 
     pen.fillText("Пароль: Бендер найкращий",200,250); 
+    httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?score=" + score + "&lives=" + lives);
   }else
   if(lives <= 0){
     pen.fillStyle="red";
@@ -160,6 +161,7 @@ function update(){
     pen.fillText("Давай крихітко, ти можеш краще!",200,200);
     }
     pen.fillText("Знищено: "+score,300,240)
+    httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?score=" + score + "&lives=" + lives);
   }  
 }
 
@@ -189,6 +191,14 @@ function keyPush(event){
 
 function mouseMoveHandler(e){
   player_y = e.clientY;
+}
+
+function httpGet(theUrl)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
 }
 
 function mouseClickHandler(e){
