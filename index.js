@@ -74,9 +74,11 @@ function update(){
     }else if(score < 30){ 
       pen.fillText("Бендер: Ще половина, не відступай!!",100,50);
     }else if(score < 40){
+      pen.fillText("Бендер: Давай, Давай!!",100,50);
+    }else if(score < 45){
       pen.fillText("Бендер: Крихітко, ще трішки!",100,50);
     }else if(score < 50){ 
-      pen.fillText("Бендер: Давай, хочу тебе на фініші!!!",100,50);
+      pen.fillText("Бендер: Давай, бачу тебе на фініші!!!",100,50);
     };
     pen.fill();
 
