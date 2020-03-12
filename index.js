@@ -7,7 +7,7 @@ window.onload = function(){
   //Create drawing element
   pen = canvas.getContext("2d");
   isgameover = 0;
-      alert("0");
+      //alert("0");
 
   //Scanning for Keyboard action
   //document.addEventListener('keydown',keyPush);
@@ -147,7 +147,7 @@ function update(){
     pen.fillText("Пароль: Бендер найкращий",200,250); 
     if(isgameover == 0){
       isgameover = 1;
-      alert("1");
+      //alert("1");
       httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?score=" + score + "&lives=" + lives);
     }
   }else
@@ -169,7 +169,7 @@ function update(){
     pen.fillText("Знищено: "+score,300,240)
     if(isgameover == 0){
       isgameover = 1;
-      alert("1");
+      //alert("1");
       httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?score=" + score + "&lives=" + lives);
     }
   }  
