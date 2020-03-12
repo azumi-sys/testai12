@@ -7,7 +7,6 @@ window.onload = function(){
   //Create drawing element
   pen = canvas.getContext("2d");
   isgameover = 0;
-      //alert("0");
 
   //Scanning for Keyboard action
   //document.addEventListener('keydown',keyPush);
