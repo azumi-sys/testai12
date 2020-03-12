@@ -56,9 +56,6 @@ function spawn(){
 //----------------------
 
 function update(){
-  if(isgameover == 1){
-    return;
-  }
   //Create Background
   pen.fillStyle = "black";
   pen.fillRect(0,0,canvas.width,canvas.height);
@@ -208,7 +205,7 @@ function httpGet(theUrl)
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
     xmlHttp.send( null );
-    //return xmlHttp.responseText;
+    return xmlHttp.responseText;
 }
 
 function mouseClickHandler(e){
