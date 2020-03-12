@@ -6,6 +6,7 @@ window.onload = function(){
   document.body.appendChild(canvas);
   //Create drawing element
   pen = canvas.getContext("2d");
+  isgameover = 0;
 
   //Scanning for Keyboard action
   //document.addEventListener('keydown',keyPush);
@@ -15,7 +16,7 @@ window.onload = function(){
   document.addEventListener("mousedown", mouseClickHandler, false)
   //Set Images
   spaceship = new Image();
-  spaceship.src = "http://pixelartmaker.com/art/d9c710d4c7e1ae6.png";
+  spaceship.src = "http://pixelartmaker.com/art/dfa18b21ddb32df.png";
   bullet = new Image();
   bullet.src =
   "http://pixelartmaker.com/art/17f45360a19f8e6.png";
@@ -64,7 +65,22 @@ function update(){
     pen.beginPath();
     pen.font = "30px Arial"
     pen.fillStyle = "white";
-    pen.fillText("Lives: "+lives+" Score: "+score,350,30);
+    pen.fillText("Життя: "+lives+" Знищено: "+score,100,25);
+    if(score < 5){ 
+      pen.fillText("Бендер: Покажи, чого ти варта",100,50);
+    }else if(score < 10){ 
+      pen.fillText("Бендер: Мішок з кістками, піднажми!",100,50);
+    }else if(score < 20){ 
+      pen.fillText("Бендер: Валентинооооо, ти зможеш!",100,50);
+    }else if(score < 30){ 
+      pen.fillText("Бендер: Ще половина, не відступай!!",100,50);
+    }else if(score < 40){
+      pen.fillText("Бендер: Давай, Давай!!",100,50);
+    }else if(score < 45){
+      pen.fillText("Бендер: Крихітко, ще трішки!",100,50);
+    }else if(score < 50){ 
+      pen.fillText("Бендер: Давай, бачу тебе на фініші!!!",100,50);
+    };
     pen.fill();
 
     //Create Player 
@@ -124,13 +140,38 @@ function update(){
     }
   }
   //Type Game Over
+  
+  if(score >= 50){
+    pen.fillText("Крихітко, ти пройшла підготовку!",200,200); 
+    pen.fillText("Пароль: Бендер найкращий",200,250); 
+    if(isgameover == 0){
+      isgameover = 1;
+      //alert("1");
+      httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?score=" + score + "&lives=" + lives);
+    }
+  }else
   if(lives <= 0){
     pen.fillStyle="red";
     pen.textAlign="center";
     pen.textBaseLine="middle";
-    pen.fillText("GAME OVER",300,200);
-    pen.fillText("Score: "+score,300,240)
-  }
+    if(score <= 0){
+    pen.fillText("Мішок з кістками, вважай, нас знищили!",200,200);
+    }else if(score <= 10){
+    pen.fillText("Ти там що, заснула?",200,200);
+    }else if(score <= 20){
+    pen.fillText("Мішок з кістками, дивись куди летиш!",200,200);
+    }else if(score <= 30){
+    pen.fillText("Валентино спробуй ще!",200,200);
+    }else{
+    pen.fillText("Давай крихітко, ти можеш краще!",200,200);
+    }
+    pen.fillText("Знищено: "+score,300,240)
+    if(isgameover == 0){
+      isgameover = 1;
+      //alert("1");
+      httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?score=" + score + "&lives=" + lives);
+    }
+  }  
 }
 
 
@@ -159,6 +200,14 @@ function keyPush(event){
 
 function mouseMoveHandler(e){
   player_y = e.clientY;
+}
+
+function httpGet(theUrl)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
 }
 
 function mouseClickHandler(e){
