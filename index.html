@@ -91,7 +91,7 @@
 		
 		function loadScene(scena){
 			if (currentScena != null){
-				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "&message=" + $("#message").val());
+				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "nextScenaId=" + scena.Id + "&message=" + $("#message").val());
 			}
 			currentScena = scena;
 			if ($("#message").val() != ""){
@@ -118,9 +118,9 @@ function httpGet(theUrl)
 {
 	if(debug == 0)	{
     var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
     xmlHttp.send( null );
-    return xmlHttp.responseText;
+    //return xmlHttp.responseText;
 	}
 }
   
