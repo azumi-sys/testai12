@@ -91,7 +91,7 @@
 		
 		function loadScene(scena){
 			if (currentScena != null){
-				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "nextScenaId=" + scena.Id + "&message=" + $("#message").val());
+				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "&nextScenaId=" + scena.Id + "&message=" + $("#message").val());
 			}
 			currentScena = scena;
 			if ($("#message").val() != ""){
