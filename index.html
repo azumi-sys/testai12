@@ -25,11 +25,14 @@
 		<h3 id = "about">Валентина: </span></h3>
 		<input type="text" id="message" class="form-control" placeholder="Скажи щось" aria-label="" aria-describedby="basic-addon1">
 	</div>
+	<div class="input-group mb-3">
+		<input id = "buttonSay" class="btn btn-primary" type="button" value="Сказати">
+	</div>
 	<input id = "buttonPrev" class="btn btn-primary" type="button" value="Назад">
 	<input id = "buttonNext" class="btn btn-primary" type="button" value="Вперед">
 
     <script>
-		var debug = 0;
+		var debug = 1;
 		var scenes = [];
 		var currentScena;
 		let scena0 = new Object();
@@ -45,19 +48,55 @@
 		
 		let scena1 = new Object();
 		scena1.whereSpace = "Земля. Космопорт";
-		scena1.whereAmI = "Місце посадки корабля";
+		scena1.whereAmI = "Місце парковки корабля";
 		scena1.about = "Ти зайшла до космопорту, Бендер іде попереду, проходить контроль і проводить тебе за собою. Ти бачиш корабель, від його вигляду у тебе перехоплює подих";
 		scena1.img1 = "https://vignette.wikia.nocookie.net/futurama/images/a/ac/Planet_Express_Ship-1-.jpg/revision/latest?cb=20181007161126&path-prefix=ru";
-		scena1.nextScene = null;
+		scena1.nextScene = 2;
 		scena1.prevScene = 0;
 		scena1.Id = 1;
 		scenes[1] = scena1;
+		
+		let scena2 = new Object();
+		scena2.whereSpace = "Земля. Космопорт";
+		scena2.whereAmI = "Рубка управління корабля";
+		scena2.about = "Ти зайшла до корабля. Бачиш панелі управління, великі ілюмінатори, шкіряні крісла, відчуваєш запах шкіри і техніки. \nПовітря свіже, вітерець з вентиляції торкається твого волосся. Ти сідаєш у крісло пілота у ньому мяко і зручно.  \nБендер: Звідси можна керувати як польотом так і системами корабля. Подобається рубка управління Крихітко?";
+		scena2.img1 = "https://stargate2015.clan.su/_ph/50/376252964.jpg";
+		scena2.nextScene = 3;
+		scena2.prevScene = 1;
+		scena2.Id = 2;
+		scenes[2] = scena2;
+		
+		let scena3 = new Object();
+		scena3.whereSpace = "Земля. Космопорт";
+		scena3.whereAmI = "Каюта корабля";
+		scena3.about = "Ти зайшла до каюті корабля, в каюті теж свіже чисте повітря. Ти почуваєшся так ніби уже тут була раніше.\nБендер: Під час польоту ти зможеш тут відпочити і поспати. Бендер: Як тобі каюта,  Крихітко?";
+		scena3.img1 = "https://i.pinimg.com/originals/fd/bf/fd/fdbffdabf7e532838241f31e3434e408.jpg";
+		scena3.nextScene = 1000;
+		scena3.prevScene = 2;
+		scena3.Id = 3;
+		scenes[3] = scena3;
+		
+		
+		
+		
+		let scena1000 = new Object();
+		scena1000.whereSpace = "Тут ще нічого немає";
+		scena1000.whereAmI = "...";
+		scena1000.about = "Можете щось сказати, можливо це вплине на сюжет";
+		scena1000.img1 = "https://i.ytimg.com/vi/Pr4zKFXvFcU/hqdefault.jpg";
+		scena1000.nextScene = null;
+		scena1000.prevScene = 2;
+		scena1000.Id = 1000;
+		scenes[1000] = scena1000;
 		
 		function loadScene(scena){
 			if (currentScena != null){
 				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "&message=" + $("#message").val());
 			}
 			currentScena = scena;
+			if ($("#message").val() != ""){
+				alert("ти сказала: " + $("#message").val());
+			}
 			$("#whereSpace").html(scena.whereSpace);
 			$("#whereAmI").html(scena.whereAmI);
 			$("#about").html(scena.about);
@@ -68,10 +107,12 @@
 			document.getElementById("buttonPrev").onclick = function() { /*alert(scena.prevScene);*/ loadScene(scenes[scena.prevScene]); };
 			$('#buttonNext').prop('disabled', scena.nextScene == null);
 			$('#buttonPrev').prop('disabled', scena.prevScene == null);
+			$('#buttonSay').prop('hidden', scena.Id != 1000);
 			
 			$("#message").val("");
 		}
 		loadScene(scenes[0]);
+		document.getElementById("buttonPrev").onclick = function() { loadScene(scenes[1000]); };
 				 
 function httpGet(theUrl)
 {
