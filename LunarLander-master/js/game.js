@@ -328,10 +328,10 @@ Game.prototype.handle_landing = function() {
 		if (current_time - this.landing_time > 2000 && !this.assigned_score) {
 			console.log(angle_diff*180/Math.PI);
 			
-			/*if((landing_vel > localStorage.getItem("landing")) ||( (localStorage.getItem("landing") === null))){
+			if((landing_vel > localStorage.getItem("landing")) ||( (localStorage.getItem("landing") === null))){
 				localStorage.setItem("landing", landing_vel);
 			}
-			 */
+			 
 			if (angle_diff*180/Math.PI > 20) {
 				this.message = "Крихітко, завелеке відхилення";
 				this.game_status = "GAME OVER";
