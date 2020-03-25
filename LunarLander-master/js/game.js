@@ -305,7 +305,7 @@ Game.prototype.handle_collision = function(other_object, relative_velocity, rela
 	}
 
 	if (vel > 32) {
-		this.message = "Крихітко, ти можеш краще";
+		this.message = "Валентино, ти можеш краще";
 		this.game_status = "GAME OVER";
 		this.landing_type = 2;
 		this.lander.flames_on = true;
@@ -330,12 +330,10 @@ Game.prototype.handle_landing = function() {
 			
 			if((this.landing_vel > localStorage.getItem("landing")) ||( (localStorage.getItem("landing") === null))){
 				localStorage.setItem("landing", this.landing_vel);
-			};
-			
-			//alert(localStorage.getItem("landing"));
+			}
 			 
 			if (angle_diff*180/Math.PI > 20) {
-				this.message = "Крихітко, завелеке відхилення";
+				this.message = "Валентино, завелеке відхилення";
 				this.game_status = "GAME OVER";
 				this.landing_type = 2;
 				this.lander.flames_on = true;
@@ -348,7 +346,7 @@ Game.prototype.handle_landing = function() {
 				
 			}
 			else if (this.landing_vel < 16) {
-				this.message = "Крихітко, ти Молодчинка!!!";
+				this.message = "Валентино, ти Молодчинка!!!";
 				this.score += 100;
 				this.landing_type = 0;
 				
