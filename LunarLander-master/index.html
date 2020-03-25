@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<title>Тренажер з приземлення на Місяць</title>
+	
+
+	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+	<style>
+		* { margin: 0; padding: 0; }
+
+		@font-face {
+		    font-family: 'BenderLight';
+/*		    src: url('fonts/Bender_Light.eot');*/
+	/*	    src: url('fonts/Bender_Light.woff') format('woff'),*/
+		    src: url('fonts/Bender_Light.ttf') format('truetype');
+/*		         url('fonts/Bender_Light.svg#BenderLight') format('svg');*/
+		    font-weight: normal;
+		    font-style: normal;
+
+		}
+		
+		html { 
+			background: url(images/bkg.png) no-repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}
+
+		#footnote {
+			position: absolute;
+			bottom:10px;
+			right: 20px;
+			width: 100%;
+			font-family: 'BenderLight';
+			color: #FFFFFF;
+			font-size: 12px;
+			text-align: right;
+		}
+		#footnote a {
+			color: #FFFFFF;
+		}
+	</style>
+
+	<script type="text/javascript" src="js/underscore.js"></script>
+	<script type="text/javascript" src="js/three.min.js"></script>
+	<script type="text/javascript" src="js/THREEx.KeyboardState.js"></script>
+	<script type="text/javascript" src="js/audio.js"></script>
+	<script type="text/javascript" src="js/jsfx.js"></script>
+	<script type="text/javascript" src="js/jsfxlib.js"></script>	
+	<script type="text/javascript" src="js/physi.js"></script>
+	<script type="text/javascript" src="js/Tween.js"></script>
+	<script type="text/javascript" src="js/Sparks.js"></script>
+	<script type="text/javascript" src="js/ThreeSparks.js"></script>
+	<script type="text/javascript" src="js/stats.js"></script>
+
+
+	<!-- Game Javascript -->
+	<script type="text/javascript" src="js/lander.js"></script>
+	<script type="text/javascript" src="js/ground.js"></script>
+	<script type="text/javascript" src="js/terrain.js"></script>
+	<script type="text/javascript" src="js/game.js"></script>
+	<script type="text/javascript" src="js/sounds.js"></script>
+
+	
+</head>
+
+<body style="overflow:hidden;">
+	<div id="footnote" style="z-index: 3">Зроблено Бендером</a></div>
+</body>
+
+</html>
