@@ -1,494 +1,401 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Політ на ракеті Бендера (далі буде...)</title>
-    <link href="index.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+'use strict';
+
+Physijs.scripts.worker = 'js/physijs_worker.js';
+Physijs.scripts.ammo = 'ammo.js';
+
+var Game = function() {};
+
+var threexSparks;
+
+Game.prototype.init = function() {
+
+	this.renderer = this.init_renderer();
+
+	this.hud = this.init_hud();
+
+	this.start_time = new Date();
+	this.elapsed_time = 0;
+	this.landing_time;
+	this.landing_vel;
+	this.landing_angle;
+	this.assigned_score = false;
 
 
-  </head>
-  <body">
-	<h2 id = "whereSpace">Де знаходиться корабель<span class="badge badge-secondary">New</span></h2>
-	<h2 id = "whereAmI">Де знаходиться людина<span class="badge badge-secondary">New</span></h2>
-	<div>
-	<img id = "img1" src="" class="rounded">
-	</div>
-	<div id = "mutable_part">
+	this.radius = 300;
+	this.score = 0;
+	this.landed = false;
+	this.landing_type = 0;
+	this.paused = true;
+	this.game_started = false;
+	this.start_message = "Натисни пробіл для старту"
+	this.start_instruction = ""
+
+	this.message = this.start_message;
+	this.game_status = this.start_instruction;
+
+	this.render_stats;
+	this.init_stats();
+
+
+	this.scene = this.init_scene();
+
+	this.camera = this.init_camera();
+
+	this.lights = this.init_lights();
+
+	this.lander = new Lander(this.scene);
+	this.lander.mesh.addEventListener( 'collision', this.handle_collision.bind(this));
+
+
+	this.terrain = new Terrain(this.scene);
+
+	this.keyboard = new THREEx.KeyboardState();
+
+	requestAnimationFrame(this.render.bind(this));
+
+	window.addEventListener( 'resize', this.onWindowResize.bind(this), false );
+};
+
+Game.prototype.init_renderer = function() {
+	var renderer =  new THREE.WebGLRenderer({ antialias: true });
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.shadowMapEnabled = true;
+	renderer.shadowMapSoft = true;
+	renderer.setClearColorHex( 0x111111, 0 );
+	renderer.domElement.id = "game";
+	renderer.domElement.style.position = "absolute";
+	renderer.domElement.style.zIndex   = 0;
+	document.body.appendChild(renderer.domElement);
+	return renderer;
+};
+
+Game.prototype.onWindowResize = function() {
+	this.camera.aspect = window.innerWidth / window.innerHeight;
+	this.camera.updateProjectionMatrix();
+
+	this.renderer.setSize( window.innerWidth, window.innerHeight );
+	this.hud.width = window.innerWidth;
+	this.hud.height = window.innerHeight;
+};
+
+Game.prototype.init_stats = function() {
+	this.render_stats = new Stats();
+	this.render_stats.domElement.style.position = 'absolute';
+	this.render_stats.domElement.style.top = '1px';
+	this.render_stats.domElement.style.zIndex = 100;
+
+	this.render_stats.domElement.hidden = true;
+	document.body.appendChild(this.render_stats.domElement);
+};
+
+Game.prototype.init_hud = function() {
+	var canvas = document.createElement('canvas');
+	canvas.id     = "hud";
+	canvas.width  = window.innerWidth;
+	canvas.height = window.innerHeight;
+	canvas.style.zIndex   = 1;
+	canvas.style.position = "absolute";
+
+	document.body.appendChild(canvas);
+
+	return canvas;
+};
+
+Game.prototype.update_hud = function() {
+	var context = this.hud.getContext("2d");
+	context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+	context.font = "20px BenderLight";
+	context.fillStyle = 'white';
+	context.textAlign = 'right';
+
+	var score_string = ("0000" + this.score.toString()).slice (-4)
+	context.fillText("Очки", 100, 80);
+	context.fillText(score_string, 170, 80);
+
+	context.fillText("Час", 100, 110);
+	context.fillText(this.get_simple_time(), 170, 110);
+
+	context.fillText("Пальне", 100, 140);
+	context.fillText(Math.round(this.lander.fuel), 170, 140);
+
+	this.get_simple_time();
+
+	var vel = this.lander.mesh._physijs.linearVelocity;
+
+	var h_velocity = Math.round(Math.abs(vel.x));
+	var v_velocity = Math.round(Math.abs(vel.y));
+	var altitude = Math.round(this.lander.mesh.position.y);
+
+	var h_string = ("000" + h_velocity.toString()).slice(-3);
+	var v_string = ("000" + v_velocity.toString()).slice(-3);
+	var a_string = ("000" + altitude.toString()).slice(-3);
+
+	context.fillText("Висота", window.innerWidth - 120, 80);
+	context.fillText(a_string, window.innerWidth - 50, 80);
+
+	context.fillText("Горизонтальна швидкість", window.innerWidth - 120, 110);
+	context.fillText(h_string, window.innerWidth - 50, 110);
+
+	context.fillText("Вертикальна швидкість", window.innerWidth - 120, 140);
+	context.fillText(v_string, window.innerWidth - 50, 140);
+
+	context.font = "24px BenderLight";
+	context.textAlign = 'center';
+
+	context.fillText(this.message, window.innerWidth/2, window.innerHeight/2+100);
+	context.fillText(this.game_status, window.innerWidth/2, window.innerHeight/2+130);
+}
+
+Game.prototype.init_scene = function() {
+	var scene = new Physijs.Scene({ fixedTimeStep: 1 / 120 });
+	scene.setGravity(new THREE.Vector3( 0, -9.8, 0 ));
+	scene.fog = new THREE.FogExp2( 0x3B3B47, 0.001 );
+	return scene;
+};
+
+Game.prototype.init_camera = function() {
+	var WIDTH = window.innerWidth,
+	    HEIGHT = window.innerHeight;
+
+	var VIEW_ANGLE = 45,
+	    ASPECT = WIDTH / HEIGHT,
+	    NEAR = 0.1,
+	    FAR = 10000;
+	var camera = new THREE.PerspectiveCamera(  VIEW_ANGLE,
+                                ASPECT,
+                                NEAR,
+                                FAR  );
+	camera.position.set( 0, 100, this.radius);
+	// camera.position.set(0, 0, 100);
+	camera.lookAt(new THREE.Vector3(0, 0, 0) );
+	camera.h_rotation = 0;
+
+	this.scene.add(camera);
+
+	return camera;
+}
+
+Game.prototype.init_lights = function() {
+	var lights = [];
+	// Light
+	var d_light = new THREE.DirectionalLight( 0xFFFFFF );
+	d_light.position.set( 300, 200, 300 );
+	d_light.intensity = .7;
+	d_light.target.position.set(0, 0, 0);
+	d_light.castShadow = true;
+	d_light.shadowBias = -.0001
+	d_light.shadowMapWidth = d_light.shadowMapHeight = 2048;
+	d_light.shadowDarkness = .7;
 	
-	</div>
-	<div class="input-group mb-3">
-	<h3 id = "about">Що ти бачиш<span class="badge badge-secondary">New</span></h3>
-	</div>
-	<div class="input-group mb-3">
-		<h3 id = "namePerson"></span></h3>
-		<input type="text" id="message" class="form-control" placeholder="Скажи щось" aria-label="" aria-describedby="basic-addon1">
-	</div>
-		<input id = "buttonSay" class="btn btn-primary" type="button" value="Сказати">
-		<input id = "buttonYes" class="btn btn-success" type="button" value="">
-		<input id = "buttonNo" class="btn btn-danger" type="button" value="">
-		<input id = "buttonCh1" class="btn btn-primary" type="button" value="">
-		<input id = "buttonCh2" class="btn btn-primary" type="button" value="">
-		<input id = "buttonCh3" class="btn btn-primary" type="button" value="">
-		<input id = "buttonCh4" class="btn btn-primary" type="button" value="">
-	<input id = "buttonPrev" class="btn btn-primary" type="button" value="Назад">
-	<input id = "buttonNext" class="btn btn-primary" type="button" value="Вперед">
+	lights.push(d_light);
 
-    <script>
-		var debug = 0;
-		var name = "Валентина"
-		var secName = "Крихітка"
-		var lastButtonVal;
-		
-		$("#namePerson").html(name + ": ");
-		
-		var scenes = [];
-		var currentScena;
-		let scena0 = new Object();
-		scena0.whereSpace = "Земля";
-		scena0.whereAmI = "Космопорт.";
-		scena0.about = "Бендер чекає тебе на кораблі, тебе зупиняють на контролі"
-					 + " <br>Контроль: будь ласка, пройдіть до контроль температури. Також Вас обшукають у зв`язку з виявленими випадками контрабанди антисептиків." 
-					 + " <br>Тобі міряють температуру і прискіпливо обшукують."
-					 + " <br>Контроль: Ваша перепустка"
-					 + " <br>Ти показуєш перепустку СБУ і проходиш на територію";
-		scena0.img1 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUTExIVFhUXGRkaGBUYGBgaGhgYGBcXGhcaGBsdHSggGBslGxgYIjEiJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGxAQGy0lHSUtLS0tLS0rLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIALEBHAMBIgACEQEDEQH/xAAbAAACAgMBAAAAAAAAAAAAAAAEBQMGAAECB//EAEcQAAIBAgQDBQQGBgcHBQAAAAECEQADBBIhMQVBUQYTImFxFDKBkSNCobHB8DNSYnKC0Qc0c5Ky4fEWJDVTY6LCFUOztMP/xAAZAQADAQEBAAAAAAAAAAAAAAAAAQIDBAX/xAAqEQEBAAIBBAECBQUBAAAAAAAAAQIRIQMSMUFRBDJhcYGh8CJCsdHhE//aAAwDAQACEQMRAD8AjFdrXNbFUTutitA1sUEw1xFdmtRQHMVutxQvEMSbaggAszBVmYk7THLSgEnE8diu9uDD54ym2Qil5DiGkQYOu/7I1qtDhjJq6XVgAqCja6aTI2MR/pFXAYPGNYa4cX3GUXA1u26jxF8rg5AGEmNGJJ0pdjeF4pXdTirpPhJLOz+HKp8U77j7d5qpC2Y9j8UHs+KFbOwjaYCyVB5a8pqxotec2MU+HxCXLid4BOo00g76atBnkJr0XB31uotxDKsJH+fQ0BMrVNlkVABUqXeVMIFsPOnL7ajuhmaG36bUwV/OucayFeWaqlTUNjSPtrrG3ZbQRUOHPiE1u6QWJAMVUnKdtIKIsiu8NhwRJNZbTWKucprddCt047NYHvbssPCniPmfqj5/dTvE2mTd0V3rDIQGBBIkA7x6VpKZdtr57zzABHwJB+9aW2GDAEc6MeRlNCsPEiizZ19OtQYW1Jpnh8KG0k+lF4ERFRsBTbhfD41dZBGnrPSicJhFAACj1NFMYG/yrHLL1GkxS5o/lXJUNvXNtuUVq9ilWZ3FZ8rcYjhitsIrEwKqIJFLb/HiMwG8aUiu8QedyfjT1fY4POJX1AKiKr125rXBvzUNxqRsdq4N2uZrgrQCKsFdlK0RSUwV1XNTYcCddqA3irYVygM5cs+pUEx5a1wBUmKabl0zIzwG3JgdYEj4VwKZRqKixaDI0gGBInqNj8KIArm+wCOSYARpOpjTy13igFFiQmNZVDZrojb3WugHU7bipeLmGxJ/ZtgGRrrYjntuagt421bw+JVrqKzMpALLPhuSdJnlUGI4jauNeC3rcMAPEw1CKpIGv6yAfZV+kewF3Dh/CRvkXbbMImKuvC8Itq2ttfdUQJ3PMk+p1qsYG3qmb3WZSrAGCUnSYiZO0zVwQUjR3lA1qPvADrRdy3NBXUI3FOCse4ZkVGTrXWlc1cRW0pphrC5Zkknel1pJMDenOGt5RrRRES+EHSo7epoq6xOkVJhsJzp40rAZXpVw7KWsuHZiNWY6+QED7Z+dKMRw4BMy7jWKb8P4hbW13SEuyKxYhSVQmWAd/dDajwzOuwpdS8aPCcqt2xWbwYbBWB+JQr91LuCtII6GpeJ4i7fsC4y21DFQpz6s4ndcvhGnU70Fw98johEM4adZEr0+Ap4+RfCyYe6QCBsadcNQ6GkOH0gkU2w/EhbPufDnWmU4Z4rJk0qIWi2lLx2iWNUINdcO4wbjQq7bkmK59VrLDpbQA2mqlxbHk3I2ApjxnibjwxA69aqhZmfTU6/6mp+2bq/Lq9cmaH7zStYtlQkZ1ZgNlZTJ6CGJ+YFANi1mJ1+Y18xIqrKUsFterQeobeuo1oqxZmoUxamW2elGYfDinFrBrA2oJ5+K0RWhUkUGhipcONfhWmA+J2HX0611YInziY5wY5UCuru3xqMVLeGgqGgR2KU9oRcZVt29S+eUzFSwAGxBGxI0nWRoaa11btyy6CcyAGJjxrt8qAobcGv3HuMli2ApVTKGM2ZtEnkCCNxsPUr8bw66HCm3bk3OQOUkRqY5cojlXo3CF/3e7yzXdOesM3P1oHiNkG7cbo77D/qf5fbVTHhO1Lui9YtrdRVtTc0MksTl1mSRl0iI6V6VwnEtcs27jABmQExtqOVIuJ8MF3DYNXgd4xEjUjRQTrz15zVkwWGW2i21EKoAHoKNaETK9Q4m4D0qdrE84rg4QkidRImN4nX7KcFLqk7rSajxfEYxRRsOLQzaKrFxl+qwKiI22B++rEiow8QFV3IhAtOcHbOUakE9fwFYcPbSTAIOwPKp7YDCdqLT0xNgCJJ5mPu6U0wdsjTQfjQVuxDAk76a/b+fOjhcykRECiCjFAIiJ61LhLwFp7YiCGI0iSzXpGnQW9/KucNcDAwNudRYnBMLNwyBmWA3TO7GRryDt/eqczxUdLWRFUksHRGAnQHxnmfKtYGxnxVpV3h4+MfLenPHOF28P3YUmAxGwHvl+nmx+dVzAYlrWJtt+1k+DMI+0CqhPRLPD7aDXcdddetEWcDbJVy2xJjz5H76RrfZjvpRL4sZYq7bpMhyrIx0UGOZ286gxItWUOQgMTJ319aT4vimRAoOvPynlSXFcQZtzWSxnEceWO9LRi2ElVzGIgmBuPe6jTYfYNx3u1wjaipvJ+FU4xh3csb1rLm5rmHyKmKXZrgjLecZVCgN4xC+7oYjSBudq9Dt71CvCrT+9bU+YEa+ZGpo3YakWuKYm34oDDqh8XxVoJ9BXpvZe8MVhkxC6BswKFSGVkOVs0n7tupoHDdlsNIJQnyLEirnw/DAKAAAo2AEAegFG9+QAsWPI1OBGhmasOFwyb1McBbOuUUtnI8dFHpgy2GxFxQTctwFEjcSXkHoo2oFbmWGmIIgnruPuqDi3BWs2PbTeZjfZpQqASzMzg+GAynKTt0ogEcJIvG2hYS2UNESJjNpQ/BbyupZVC7j4A1VTxi4l43FJQklliCRmPTWDrW0xuVDsGWCscyzKDPXQTTJdb+w+P4VCTFVte0rNbhhBB1Yb5dfFtA1jzprgeJ2yBnuAEmPFoYmJjpodfSkIY29aTdr3xC21awYUHxkGGGoykHkJ6a0c/EkUXWkd2lzuw4I8cl8rKOkLJ6SKG49jFbDeEM/eDwgA6gEEzMRoDQHmtzO5zFtZGhOnXQE68vnUYsso32PI/iOX86tbdl8RliFAR2RiWOj29HUnKV0IIgHcUE/CbndSFXViIBJ08JnaNyB8TRo9lx4jiEVJusyiYRjIGoBgE+HblFewcELXbFpyhDMiEqJJBIGnXciqhw3sM13BHEXw1rIzANK5e5CTmy/WJusV3+r5E16f2VNmxbs2bJZw1lAjXIXObZgQI1M6kAmBl3mguHOD4fnt4gKT39pWi3oDng5ZB5SPQ0VhOGQFDkd7E5CDlBVgLgYruBmEQdZqr3sFaxGLv37t7u71vIbdvvmnPbVjctqM0QGWNBEgkCN3HEOPYTO+GZxa7u+UYAlDAXNcaVMopaYk6+dLO2Y3X8/2cJO1F9UxTBSy5FTMMwadASonxACSYn8K3g8UWtq36yg/MUh49xTCPdJtJb7oKBbPdBRmAGZtg2pnU9fOmPBzNi1G2QRvtGm/lU9PK3e/wCcHlNaMe9Jo3BtQCVNauVqg6z6eY59KhW4ZoJbpruzLHTfX7BJ+6qhU4s41bauW2USfOATA84B+Rrq/wBqQL+Hw9tZVlBfPuC1sOo9QvL9odKS2puXSgH0SKyu8gDM6tIn0Ec+vOldvDXVu2bzkA3ZbLqTbQoVXN08MRryI5Urq3kTwd9o+PXE7tVIAuLeVjlBJyXMkxy50mx1pmwdu+hE22Gc5RJm7cVX02jKg+NSdoVZ7dpt4e7rl5M50BmD8K57OcU7t7dm6ua3dzW3mYAdpQxsfF8pNGxo2s4pWnL7stE9AYE+cR86zFYgAaUmwV4i81giNdD0I8vzzo3HrlJUgyI5g6lQdPLWr3wWgV26TUddRWxWanOWukt6ipEtzR2CwWYj1pGjw1nWjbWCPLWmC8OUGcjtPTlVowOFtrbHhidTO9KlFUs2iusUww92mmKw6OIgDzpA2AuSdQoHU/hQZsl4EiWj0prZxIjSqfY7xmyqMx67fGiUtXiJAJ8xQFGv2AwysJG8eYmD9p+dC9oMB/ugdAVtWjAtqGY945UOzMxHvSDlUNEcpNMK4xdrvECE+HMGIAXUiCJMSBIGxFBqDilYiGBWNACMpHPpND2rQEzJ2jbTXWrzxPCZmskAmHltNIEQT9tZ/s9ZIY5TPLxNAPWJ19KBtRBu8RlAELO5321030qe5YJMBw3hBJB8pI506bs8yd6bi5gLZKMCNX8IHhkH9bTWhsfwoWxbyMQzhJXXRmDSpO3IaDaaACuYi4yjNcLZdFE+6CDOUTAGg5cqZ8Ox5yW0YBouL4STlyw2pWRqCeZiDSu9aKuUIkrvHpJphwezEsACCCnrmmfuNVCq2e2WUtHw+MsWy+JhL6t4hvJJ1pN7cc/djD5iQO6UGQD4CCwbfVZjWfQUMt64CLYvOXUAmRoYYwOoMk6DSCOlE4LEXLd03gUlVAG5AGg1E76VV5TpardnE3mfE3LSt7RYNuzaDZgVRhcOckqPdDCAo97TmaUcaxV1jh7NnIXsqxUWtSHukO6gqcqBPdAn6vWtPj7txxg71wLh8PbzHu5i4FVDDT70hjp8oOtBdoO0Id3tYZRYwzOoju0VioVVILCTE5jv9YzUHEuJwS2mF68RhQfabiFPpblyLpXuyCwRSAxUGB7rGaX4exdxWLX2i4wUkMTen3A6wH8srSZOmu1T4t8EmMvMtvPYVWCZNtUCplkgQH1JG8neusXxfvbah0CkDLKA+K25BdoIzMQUXnET1mg3F/D4a5i3KOuTvDlRLcIYOmpJ8JjarTbw2UDlpoOlKuz+Ds++pzZWImMuvUjfbUT12p/cYbyKAF7kmuO7g0VOlDuKYd29dKPwxCK55wwgbmUf5gaE0rUmaYYRc2/50II9DNK7OWC7lwWbfd2oDAOSTzIzIBtuYn1YU3uYpbVtSlgtBUEqohVGhYtsTGwnlSFVCt4yWGYkndipM/OKPx3GH9lbvyitdVTatqD7vMmJjlueVLXJbuifF3b5MhLhHiGVgBBk7An05VW3uX9JXWRGvnT5OI3VyXzdLxJ7s6eKNj5TSnDu5cZmEA6ydPgTyq5IXdRtxWcNcXVgzMrEQWEmJHmKLXF5yrOB41Go6gEQfPw1nC2BT0JAPUTp+fKjLeFVUAGsSfnSuPwO75L7toTpXRsRv8qYJhhEjfn+eVFPg1I10PrM0aOlKKBTbh9oaeIA9Kn4ZhM06bfnSmmG4OgOdi3odqNEJFptIYfiPSuXsnOczOw8oAo21iF+I5VD3zkkZYH30aJFddF+r864shJ92Z67VJiu7UA3GVQSAOUk7D1NFLaA2inownsC/VMHmP50zwykKABAFCX7qryY+fKoF4v0XSlcbZwcry8NWw9QFoIHM7V1T0W04aprR0+NBSaKsHw/H+VGitZiDqPSoSJ3E1NfGvwrEWjQlKeIcHa/eJVCz5LVu3I8Jds85iDIART6mOtcJgWw7CzeyrcWD3WYA+60kCScssNYjXzqW/dvJi17p7aoyiSy94yvJUMtsmM2sAxszedIn4bfOKfOSlw98e8a20whJzBWAUSJgLoJ00FLxTEtJceAEKQoYtofEQzDr6eVbvhZYs4QQsnMAJltDyNCXFxNtEy4m4CdBmRCChGp23nLoekcpCzj2GvBDmc3BK6EAdQG8AljOmtPYN+IXLYZiGNw5RJBLElkHXz+6lRtEnQkyZHP/U/yra4a6Ao+iy5RoVYmANiVjofWhcJiHW8hINyNRatLcaYM66aGOY6+VKnE1q8yhhO+0aRHXXWusRxAkIDbzBVgNz29daumH4fbvYYC3aeyGfNluKQ0gkGQSTrGmtTY7s9ZufUywNMug5xOmu9Pto3CHsTjC111AfKUk5p0IIjWYEydPKrnmoHg+A7m0EMTLajnLGD8oo3LVzFO3WauC1dZazLT7RtwDReCWTvFQBanwtmTvFOYlanuGOc1YeGWs9nP3Ze4c8E5QATI0E6b9Kr7Wo5zRmBDP4O+dByRMxzbzAU+VTnjwMRWLsBVIOHtrlgAzMwN9B+Zqq44if0aj/Om/FsMFmXun1DUos28zQCT13oh6H2kUADYCizaWNzUduyOZohrIy6fOtNIDWHjaj7FhjqaAUxU4xJG1TpZxa8K6VHiLtxjqQBQQxNxhABrpLDnfT1NGga2WQCDr86LS4vWB86UjD6yWo1SBtRYC/tA4uJlHJgflMVNhuJZgDrPl0oTj9y2iAkw2YQFJBPyozhGMt90pWYiNd586foHFq7mAMGplT0+yla4+tPiFOsn5mouFPbzprcQNdSfz+etddzRGKw651OmYeZkSdqM9npJLO5oi1Z0ov2epksaCjQK79gzWrcimdyxrQHFuGXbiRZvdy362UNPrqCPhQIWHhI7p7tlHuXQ6FFVXEN3gZxCqA0gFv4jXOOxbXb7XbiXE+i0YSAWcHOIKyBqw0Ow+NeeY/imMtXXwz3ScrZSA7hZiQYUidKU3cVeGpuPqDoSduf59Kz7uV6ejeyAeKZzjcwT4ZI5abfbQOOsCHjOApBkmATJ5fCd+def3MRcgAudNdzz/wBKkbEXCNXaBykwPMDl8KO4dq+rhRcyS4CtI5/hpueh57UNYYHwBwhYxnKt4QNtV11iKpVvGuuzNpzzGZ6jpROExl93RQzEuwA31O0nfrrHKaO4ae44bB5EVBPhEa61L3JoXsrwrGWkyYi9bcAAKiLOWP24XMI6j40+9n610RBU1uhLmMQdT6CmXE7D5ZW0txRqVLOD8lIzelUfi3aDuzk+iUx7vikRqdGMz1qcs9U9bWvD3FfQHXpRHcHpVD4VicXiWiwJE6uFhF2OrRodQeutek4K2wRQ7Z3AhmC5QTzIE08bsXgGLPlRGGw8npRgUdKltWqog9zCGt2cPBBIGh26+VGGyRzrWQ0EE4omeclhdeoTpGnQUNwzh+QHOAGJ2EaAbfjTPu6zuqUmj2h9mHWtthBG5NTi1XYsmN6ZF4sKPqzWwnQRRRSt5KDQoCOldsSedd5K2EoDSkiu2umsy1hWgI7iSVMncg6xA5md+nOhcBALAGduc9a1xK7aUjPbZ2iQREAD4+fSh+BOpLZUK6CZ9TShmxasDVuK3FMij2WbmrZROxA2/Io44UctfgaHxCXTqbf/AHH+dWvBW0dBBBgAHyMdDqKyyuhOVc9i8qk9lgSdB50+xwS0jORMDQSBJ6Sdq8o7S8RvXGl2EawoZMq8tPF/nSmWxcV19mzaiCOo1FcXkVBLsqjqxAH215dwztFew9wMpAAJkSCGE7MAdR/rXoL8XwGPW3OGF+5lkDIrG28iVk6wDqT7u070dx6eedtbDPfvXFVWQgKjhRrooBVgNR7xknc8xVWbC3BndcwYxCyNBMaE7CC2nPNV8x/Y+MRcv4kMVZwLdsQbl929y2g6cpMABSTCioMF2KS89zIiOE08BhWuEjOFYnW2gAUMPeOc6CBUeVb0oC4e4FE+HRd2AJgmY15aculdPgnUDOAVI94HffXfeD6aV6LxLs9bt5LaW17u5fS2yLorNaAJ+TvcHn3ZoviGA4d3bYbu0F5XIH0cTpIBf48zVTEu55KcO0lVBJMwAAZ1nSmnAr9zDYq3cQhCHVWMKfAX8Y1U5fDI5b1dcR2Ssd2rLaRhpI1H46Hf5DagMb2WtoyhVXK0kgkZoEeFZ35/Ki4WDvleojiFphKOrj9kiPnXK4pZ1Arzzs1h1sX1Syik32CZfrg6TD80EyQdo9aveIwLJoxgxWsy2Wkl/idtRLMB5dfIdTVR7T4jC4lC2W4HClc0LqCCAdefp0HKnOJ4TibiFrVy5/dsnbcAFN/Xf7R57xHE8QV7ls3T4RnBhBmQgtMZdN132mpyyvijXwvHZfi9hLK2VUqVEkfrSZLbdTT44tT/AD0ryngOHxWIuMvfMoBIzAJJjc+7oB95G0zXoXB+y9wHvFu3XGuj3Fyk8zlAFVjnwNGwxa9T9lbtYnXwyPz0rR4Ld3IGn7QoWzbM6VUy2Vhp7URvrUljEhjGs1NhOEqyqzMxJG0iPuphYwiIIUAefP50u4aCdyazuqPyCsyCjuGi9kiPM/hUotGpb67es70QiHyo7hovNqs7qjzbFayCl3K0B7qs7qusXdEQp+w/fUeCux77H0j8Zo7i06dSIhZ9TFDfSc00HTc/bTYZTsRWwo8qexpWMWL2Ytpl0BExy1EfDYVGcQ0jLGbTT10H5NR4/iQFxh3AYqzSc0gnxDp1P55LXxgzD6FR5T/lRAtFoXf1AOXpG506/hWvZL3/AET6q386bWtVBJExyMj4HnXQjrRuDSqrx9TJjTfXf5EVI3aAKpZM/wBg2684qnW+FubYC3WJBEMLfLaD4uvWtYrhz2gO8uZWG6EorEdILyfgD6bV5uPWzz8X9v8AhaWe72kutuxyt9XTXnuVIHyNeVce7Q4kXWTJZ3MDuVLb6eteg4LgGJJuDK5AOhQSDoJGZ2UCP2Z+yuDwrAW8Wgxt7PdExbYHurYAJJuMQBcIynQnL5GtsO6fcqT5VjgPAsRfUXMVctYdGDFEWwrXr2UT9EnP122Hp6t2VwBsWgi4fuhkUs7lCzOZkNkMGBGkASdKX4G9btO14F7l29cVe+uqwK23JyqoygKiiBlEE7mq5xLtFj0xFnDErZF0gLLgtqcoMg5Rr5aRzq+TN+O3MNax1hb99rh7u6SzFYsiGbPKAQzEZdtgNuZ3ZzGqkWba2kyW0bKzHQPKrOpGaVaRm+NUS/w04a/bv4/EhndlMDO7Mq5ZLMQAFHh6kgbaVZ+C37duy+KuMUu3GZ8uQM+XRLdtQwPIovmSTtrVa4JYbV0W0t4fPaLjKe8JEE/SM7FcwjVeu70px+BSSWOGLlgwuLbIMkqurd8dZ39ahxFy290HFJd7sqdLloKSyxoAAMw8U7cvKo7tvhjqUFgqZDDMggkcpBMaSNdNaeM9ooHiHFnw63QwVlzIEyEgHvFdjzOmhH8PnRPDMb3iqXu2Q0nM2VpA/UBLQCGjefdOgJmiuKcJwpRFRFABkKjoPEdmID69P4qW8R7P57bkzh5KvnLKAGAAaSG1RlJ56FQa0m9bTw7xNizcuA23TONmVvEomRMSVP8AqNqMw3EnUtbvS2+VgBPodp012677BJi+ClLpW0wtuLAvPdyvfzrMaDPlUEKIMr570uxHEnN1V7zvF0USotwxeI1LadPFpE0u+fqvtq12+KKICtv56ev5FJ+PvhWcO2KRTkCxtI77vG94A+74fnR1jhtuwEbGm2jMdAz3FzQfEdbZzkeH1B1NO+IXXuoMllYMEGJGwg62eg+ysMMLMrbdkoHZTillLrIrB5zkMuUgahjMGRy+zrVxtcaA0EAdc1VjiHB8SpJCqu+2ZdekC2NDzodLtu2pNxzmE6upIGgkLLAkfGq6mGd8Xj8hva4WeM3GbLyJidNfQn8af2eHLl9+G8tY+7WvPcPbzotxSpBAK+EBY3keGTy68qkTGXkUm2zMu/guZgskkmAhjU7/AIU+lj2eQ9COCjRbrgfOT+ekVr2Q/wDNc/mPnGvqemlecJxm+SQ7YjXmFIXYcwktrz05fEccabNqzEbnOXQA/A78tenKtN4/A5eo27YE+Jj6k1A1o7i4/wDp/PnXnV/jz5CM7+ousAB5ELy6kmo041iCF7nvXmJJul1gEz7y9RG9Puw+C1XpJDD3btwH4H7CKiF6+D+mJ8ioivN8Vi8cFZibsawO8AGvprHxrj2s2it4Miv4ZRLpuMw+srmWCgwefT4V3Y30PHt6Vf4jcHUjy/lQV7juVZYsB1pdw7iXe2luQFzcuhBII89qrvEOIhnOe20qSPC5QQGMSMpkxz8qy6nS9yiZbWf/AGmQxmIgmBrrPnU9ziduNYHxFUDEMpIIW5C6jx5ioB/c22+yprWIsMoIuM10EeEK5gRqxJRQOQ5nWs+2z2t6Jh8WdkydffG3wJJog30DZbt1FiCZaIHLfWfu6V5q3FbdvwvdbXTwnMQSdPdchY6SDTHheGumYkJuLlxnz7D6msCeRIq8ZSvCz9pwBkeyysjMDkVgMy5knSSSCNNOu1K+xuIL3r/eHKudQljMhlvGdJE6AjaJimSpg1UZrL3HXdu9dZIMzExpprFJ24fbd81tTaXaHZiDB015/fTmy4XG8stlR8u5JY7HXQD/ADoJnucmn+Aj76rWN4WEUvkJAMF0JOh0ObRiAOopebX6qv5yFOvUfR7UrJ7gXe1gsPebvLpxBBYZQ9y4loMTOW0rBMyjlArnitq0l0FLOGBdgDcuXwjsSJ0CqzFomNZ02pL2jx9/vWXD8NhzK9/eXvnIM6rOYIp8yR5VaMPxPDWrYL2haIGYnuWQAka6hIHrNR4aJuFpcUIrtnYAnMhuZDrrvOwI3JJ1PWKVgzYweOcF1xmJvNntjIJsr9I36W40CRA8J+qNNq44vxO9jUZPaUtWCw0t+0glAGlS1y2oeSR0Hh26r8LjEBWxgFtZyFQ37hUbaKFze8fgddlB1qpNleF/fFrcVe+FlSGDZBcLZd8hkAcp5RQPFez+BxDi7dvEOBCshiF3gFlbz1EHWueC9nUwoLv3d+851dmJZj0VSD8SSfWKa4vGYe14XFm2+Uu85TkEEmJGpgGBHImNNSplJeP8EwFy8Ltxndra5iq3LYXXKqIZElmI0UHlrEiZBZwVw3LLwchXNLsRJCNlDK4DbLP5FUL/AGgw1+6gt2bttGvST3hJAt73SChjwr7oJ10mrX2fwWHV3YXCQVFx86AqC5bQELqQqAmdPFpTxmxldOeJWLVsk28rLrAF2wg9BqNtNNTSHFcQYaLatSZ3xNkmT6OdatPaP2TubdtyQ4OdlRAzJ3njyv8AqCCN+lEJY4UpDsllQMuRxmglZJgDmDGvpVS68JVbg/FsR+gL2VVzAU5HCyTuzaAeh2FXXhfDyFY30w99CVCsgUjptlCxMcyfKkvHcfgQ9prNu1cYnxMVMJJB1zkLBltdY6VLxfFYVlU93ZcBYYJdcIokk+4QsakyYPrSys9Hz7N+L4JVN57aS72O4YZhltoJI8IEjc7kaR8KHiex926e7s4i2xZWYA50YGfEcuuxO8nlV24Oi2CHKBLRHuqbx3ObOSwMmD158qSdo+0fcYsLauZLJKlmUAwGQEkEgwCcopTR7oO32KxK2rSXLwfu8wAe09wSzAwIbQaDXamOJ7NYjD2rma7ZXwmDawwKmFO5MlT01+6p8F2qtkyccuXz7tSPiVgj5UwTtPYUjJie8LESBcsssbaiVC9dNdOdOplvt5z2Q4ZjMUGFl7FyCZNxVciAkxOsAOv941ZrPZ/F4YO1/Ei0pWAbCWV119/OhkdNtasHDuL4ez3mIVcTcz5vGlu/dtnx6i2YyWxmERMDLqdKpHb8e1Yt3slL0qoFu26teAFtZm2uZlgk7il3XwrW1fwttnuZWe7iDl0AZ5WCZMACRqJqSyqLhESbIuHJAN23m8JBMjOBsNtKNwWJxGHB/wB0AAA+luJf8K84cv4RprBG1GtiMIFDRw0k6Zf9456xou2nOBypWqVi/jbt1hbtqz7NChjM7aBmlflRvCD3SuL15LesASWZNdQttdJ16iNatWWzdByNhlW2B4bN/EWTBmIVbcsYnrFJ+0fDbVlC93C3VbQKDi0PpoyFhoJiJ9Kfd7LW+AmL4nZKeG3mOsO0SD1NsLlPxYml7Y640BiSBsNgPQLp9ld8OwBYLcZYtsCfeA2kTuCdQfl8KmNpfqjSdz+RVc1HEC37B10O/Su8CmU+JA0jTMWEeYgiibuYiCxjpNTYDDeITI+E/AetOYlcuFo4Kv0K5Utga+H6Qx4jOufnS/ioAuEPaExIIZgCNSCJnbb4eVOOG4VjbEDSTpoNZM6Ul4vdfDh3nxKdJJIknSYNX+FZTLngJiMRhsisHg7yuV1jMVYAMQHgjcArpueXOEFu44T2pUDEAs1q0AJnXMv89PKisZ3V8q+JvWWvBVBHed2ir74AOU5j49TO4IjSTrC8GsLmuqVupZ+kuKmItOAoI94ZJg+cc6yvLeLhheyxQA2rwu6DLncZViPdAEDrNaucHxIEC0rGJgMsExJ5+f31U7nBcS4zWEv28/iHdFIgiR4faNBBMCOdTYaxjcOAbtzFBRyNtiIMzsxip7slaixtwfEgkGzoOYBPrz31qCxw+5lk2jEkc9tyR1AMj4fCh8JxQXnCWMTiB+u9xZRZByyZIQ6HUiDHlQpu8TW6B7ZaKBtWFxA2TXKdYBOgEU5llSskMrYvW4PcXB6agzt8Nftoq2mHOty06NzAGn3aVW7uM4omY3MWVWYVlbMCJ3OUEKdOfnUFri+NYSuPY8j7x13/AFT1p3L5GvgwfgvFrqyGv2DJn6RWMTpBFwE8jOnOqzxvCXbOmIxOKY6fqCfibxYn+E0UeM4oIsYq4Q20s5za8wTHLbapOC8MRrovY17bn6iwsazOYKPFpyNRFUo/9dtKCFwqsSIL3bt12OnMArHpU2C4wd7drCWtR4Us+M67hnVwPUmvQU4dwwj9Fh4Gsm3k+ZKDT1qPifazh1uFlTEQLYB22C5gB8jTKE6dpZKrdsglIYOWDt8UU2ljbqPKun4/cvFYwSFAWIZxCElcrFhZV50gb8qLxeBXFqLlizeXSTHsyL1IOjXj/CtR4LhGGV7CG1ivGYaUC25ClmlnCOBIImNZHOkabD37C2yjvhUYzC27DqoHQs6N1OsL5U4wlzPZa2wS3aZSpuAFQVIie8NoKNNORoHimNsFO7w+O9lMFYS2VVyCN7hUkEZSJDbHaq8OzL3wJxeGuGZm5fe4SeRJInY9eZqMsrPEGjTi93CjEQ1+3d111uPcBAA1KeE8+QiBReExPD7sp3ty2RsDdYQSY8ILE8wdvxoGz2DYjxrbka5rd1gG2MkFAOQ51xh+wotuWKXSRsQUME6jYzFYZdfOX7br8hp1xHEYMN3D3L8EgAt3bCRsRIkDzmK4bgNmzAu2bqq5ygXED5jOmU2sQdTpEigOJcD7q4C5RATOV+9kmeU7jy2ojiV6wRbzXCoBDLAABI6QRpI3386yn1WUn9XkQbibVoDXhHeDbNctOLv95rdwRzHjB8qQ47tBdtgpbwtrBI0asue4R1y5d4/WHlUmH4tcJLjiDo22RiSBqcsawfKegqyYX228ucKjjQ579pQoAEgyyya1n1WNutXf5BR1xdrEmbt5rrTlS3asW7dxoiGOQHTcfW+FPuF9iLl5JIazMwtwISRyPviOe4B02opeP4PChhfuri7pYtksqGVdIKm63hKyJ01B5UVwjtRg0tXLsol1iT3Iu4jKFEAAMyQD1yiNa6MctzmDkHf7L4zZGsd0oWEuJnAInxDOjxPQR6URb/8AUrY0XCvA/wCXBjyyoum1OMNc9otJiF4jct94qnu/o8qyBoMypMTz1MUHxjG3bCFjjrbCRAa2pB6arcbmOcVRbL7/ABDHsJu4XDElSuYOoOUjWPpzp8IpJg+E3rhJW1kJgBBbtXRuPEXJ0G5Omw0narRhOM8SuW1uHDpdRgCpQoBlIn3ZzD0OtVTtH2kxWIuez5Bb3HdoJZtY1bUj0BHnRJT2j4vi72GLWxfwrsQSTZtW5UgGAW7oZWkcjI8qF4V2Yv4jx3SyKxLZmVmdgY1+Mbk8+dCcQ4ccMBmuKLu/drqyayMzDRTHx++uf9pcUR3b4m73RADAQTE6wdCdOU61ckl5TbbOBuKW1Ydbee4bc6ZVVdmIcku0kA+gknXQimVhcIzaX7qnfVLJnpGW/PyFVWFa4FS3oSPESS59dconfbTrVnwPDhAJ17uVEnkZ0IPLerxu7wzympyYEIyyMWY6tZu9eqq0fCtjBAnxYqySds3fKf8AvtDlQ3sqAAd2mgIGg0B6UXg8NJMACBPTpt51rMazuUWns+9tLWQ3rBYEmBdTYxG5HnSjtPwS5dW4bQW5PiAR1OoIkaHfeiuGcNt3VYtmB0Eq7gx84/JoDjHCFtlmU+EW2OQhWzNqcxLSZOxAgdIp2ZaZ43Hu/FSW7L4xZBwl/Xn3bR/eiKv3ZPsu2GtXXNz6W4jDSDbQqSVYzBcSBI9apOJtYlLdpVkm4oKm0CHIG0ZYMkQfQ0z7I2bduy9u/hbgvm59HcawxgMAB4isg5sx/inWuWu2XZxi/wCjpMz3sRfW0jNqWVV1ZjGWWIG+gPlQlvsnhQpZOKMm4krBHKNH9Nq9G4rhTi8EUWGdralZ0UuIbltqNq8mscAxPeEYjDgACYaAd98wPiGnKa5ur1ssPEPRm+Hs3Qq2b1vDXTKGbbKLq+EyQq5D18oPQGq9juHC0chuoX2zd2hQ8p2zR5xPlU632uXllu7GYAgkwBIBOUwSBqYHzpli+GEGYKqdTFtzIUOw0JXcgCJ3euf/AN+rlr9/BSXXAW/2bxuFKXTctqSwFt0YzmO0EKIEfjUuP4ZxQv8AS2XdoHiy5tI6/Ou8TZR2TMLhAnVc5UERGaVnU7ET51ycJ3nid8UCCQMuqwDpl8O1aX6q482fz9NnoK/6O16p99Ttsvp/4msrK6KqFHFv/d/dajP6KP66P3fxrKyqhLp2+2HqaQcZ/QWP7a1/jWsrKc8j0tWM9wev4Gqri/eP7q/ea3WU+p91R0vtK+Cf1y56D7hXrmC/Q/D8KysqV0u7R+6f3fxFPML+gT90VlZRQTdlv/0f/HVQ/pj9w/vD76ysqYI88f8ARL6n7q5f3W9D99brKdVHo/Yr3cJ/Zn/xqs/0kf1z+JvuWsrK6Ot6/T/Dm6X3VdMR/wANw39nb/8AhNFdmP0SfD72rKytOj5qOt4eP4r37v77f4jQ68/SsrK5nQP4X+lT94Va8Nv+etZWVt02XVFvtUuG/P2VlZW8c9WXgOzeo/GoePbN/Zn7mrdZVsf7lX7Nf8Rwn7ln/wCuK9fGw/eH+KsrK4cvLvnhUP6Mv0f8I/xNT7iP9ds/2Vz/ABJW6ysm4TjfuXPT8apt73bnofurKyvO+q+6Kz8RnCP0Nv8Ai/xtR13esrK5MvNKP//Z";
-		scena0.nextScene = 1;
-		//scena0.prevScene = null;
-		scena0.Id = 0;									  
-		scenes[0] = scena0;
-		
-		let scena1 = new Object();
-		scena1.whereSpace = "Земля. Космопорт";
-		scena1.whereAmI = "Місце парковки корабля";
-		scena1.about = "Ти зайшла до космопорту, бачиш корабель Бендера.";
-		scena1.img1 = "https://vignette.wikia.nocookie.net/futurama/images/a/ac/Planet_Express_Ship-1-.jpg/revision/latest?cb=20181007161126&path-prefix=ru";
-		scena1.nextScene = 4;
-		scena1.prevScene = 0;
-		scena1.Id = 1;
-		scenes[1] = scena1;
-		
-		let scena2 = new Object();
-		scena2.whereSpace = "Земля. Космопорт";
-		scena2.whereAmI = "Рубка управління корабля";
-		scena2.about = "Ти зайшла до корабля. Бачиш панелі управління, великі ілюмінатори, шкіряні крісла, відчуваєш запах шкіри і техніки."
-					 + " <br>Повітря свіже, вітерець з вентиляції торкається твого волосся. Ти сідаєш у крісло пілота у ньому м'яко і зручно." 
-					 + " <br>Бендер: Звідси можна керувати як польотом так і системами корабля. ";
-		scena2.img1 = "https://stargate2015.clan.su/_ph/50/376252964.jpg";
-		scena2.nextScene = 3;
-		scena2.prevScene = 1;
-		scena2.Id = 2;
-		scenes[2] = scena2;
-		
-		let scena3 = new Object();
-		scena3.whereSpace = "Земля. Космопорт";
-		scena3.whereAmI = "Каюта корабля";
-		scena3.about = "Ти зайшла до каюти корабля, в каюті свіже чисте повітря. Ти почуваєшся як удома"
-						+ " <br> Бендер: Під час польоту ти зможеш тут відпочити.";
-		scena3.img1 = "https://i.pinimg.com/originals/fd/bf/fd/fdbffdabf7e532838241f31e3434e408.jpg";
-		scena3.nextScene = 4;
-		scena3.prevScene = 2;
-		scena3.Id = 3;
-		scenes[3] = scena3;
-		
-		let scena4 = new Object();
-		scena4.whereSpace = "Земля. Космопорт";
-		scena4.whereAmI = "Рубка управління корабля";
-		scena4.about = "Бендер: Тисни на старт, Крихітко";
-		scena4.img1 = "https://cdn.fishki.net/upload/post/2019/02/26/2891080/0eolzjgumsnymmz2vcbyifp0sqapd8ihbpqul6q.png";
-		//scena4.nextScene = 5;
-		scena4.prevScene = 1;
-		scena4.Id = 4;
-		scena4.Yes_val = "Натиснути";
-		scena4.Yes_scene = 5
-		scenes[4] = scena4;
-		
-		let scena5 = new Object();
-		//scena5.pass = "бендер найкращий";
-		//scena5.passOK = "Ракета Бендера: двигуни активовано, страрт через 5, 4, 3, 2, 1, 0...Старт!";
-		//scena5.passNotOK = "Крихітко, так ми нікуди не полетимо";
-		scena5.whereSpace = "Орбіта";
-		scena5.whereAmI = "Корабель на орбіті";
-		scena5.about = "Ракета почала стрімко набирати висоту. Прискорення притисло тебе до крісла. Ти намагаєшся пошевелитися, але нічого не виходить."
-						+ " Перед очима зявляються хмари і вмить зникають, ти у космосі."
-						+ " <br> Бендер: Уууухууууууууууууууууу!!!";
-		scena5.img1 = "https://s1.1zoom.ru/big0/267/Ships_Surface_of_planets_506715.jpg";
-		scena5.nextScene = 6;
-		scena5.prevScene = 4;
-		scena5.Id = 5;
-		scenes[5] = scena5;
-		
-		let scena6 = new Object();
-		scena6.whereSpace = "Орбіта Землі";
-		scena6.whereAmI = "Вид з вікна корабля";
-		scena6.about = "Ти бачиш нашу планету, вона гарна як і завжди"
-						+ " <br> Бендер: о Земля, гигиги, але нам до Марсу, іди відпочинь, нам ще летіти і летіти, можеш поки що поспати";
-		scena6.img1 = "";
-		scena6.mutable_part = '<iframe width="560" height="315" src="https://www.youtube.com/embed/EEIk7gwjgIM?controls=0?&autoplay=1&controls=0&showinfo=0&iv_load_policy=3&modestbranding=1&fs=0&theme=light" frameborder="0" allow="" allowfullscreen></iframe>';
-		
-		//scena6.nextScene = 7;
-		scena6.prevScene = 5;
-		scena6.Id = 6;
-		
-		scena6.Yes_val = "Піти спати";
-		scena6.Yes_scene = 7
-		scena6.Ch2_val = "Залишитися з Бендером";
-		scena6.Ch2_scene = 12
-		scenes[6] = scena6;
-		
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Каюта корабля";
-		scena.about = "Ти зайшла до каюти корабля. Почуваєшся як удома. Лягаєш в ліжко. Вмикається система зв`язку"
-					+ " <br> Бендер: Солодких снів, Крихітко";
-		scena.img1 = "https://i.pinimg.com/originals/fd/bf/fd/fdbffdabf7e532838241f31e3434e408.jpg";
-		scena.nextScene = 8;
-		//scena.prevScene = 6;
-		scena.Id = 7;
-		scenes[7] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Каюта корабля";
-		scena.about = "В каюті лунає приємна музика, за вікном не змінний пейзаж зірок, монотонно, але приємно гудуть двигуни."
-					+ " <br> Ти заплющуєш очі і солодко засинаєш";
-		scena.img1 = "https://i.pinimg.com/originals/fd/bf/fd/fdbffdabf7e532838241f31e3434e408.jpg";
-		scena.nextScene = 9;
-		scena.prevScene = 7;
-		scena.Id = 8;
-		scenes[8] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Каюта корабля";
-		scena.about = "Ти прокидаєшся від насвистування Бендера. Бендер стоїть біля ліжка і розколочує щось схоже на суп. Цікаво, чи давно він тут стоїть?"
-					+ " <br> Бендер: Крихітко прокидайся, треба поїсти за годину до посадки, я приготував смачний борщ!"
-					+ " <br> Бендер: До речі, ти голосно хропиш!...Жартую. Це у мене машинне масло, а не борщ, гигиги, їжа запакована з землі, ходімо в Рубку управління"
-					+ " <br> Бендер виходить, ти вилизаш з під одіяла, умиваєшся і теж прямуєш до Рубки";
-		scena.img1 = "https://avatarko.ru/img/kartinka/12/multfilm_Futurama_Bender_povar_11486.jpg";
-		scena.nextScene = 10;
-		scena.prevScene = 8;
-		scena.Id = 9;
-		scenes[9] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Орбіта Марсу";
-		scena.whereAmI = "Рубка управління корабля.";
-		scena.about = "Ти заходиш до Рубки управління, Бендер накрив на стіл. Їжа пахне пречудово. Чи ти дуже зголодніла...але на смак їжа просто чудова."
-					+ " <br> Бендер: Крихітко, поглянь у вікно";
-		scena.img1 = "https://ichef.bbci.co.uk/images/ic/832xn/p081696y.jpg";
-		//scena.nextScene = 11;
-		scena.prevScene = 9;
-		scena.Yes_val = "Подивитися у вікно";
-		scena.Yes_scene = 11
-		scena.Id = 10;
-		scenes[10] = scena;
-		
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Орбіта Марсу";
-		scena.whereAmI = "Вид з вікна корабля";
-		scena.about = "Ти бачиш Марс у світлі Сонця, це прекрасно, ти відчуваєш піднесення і радість"
-					+ " <br> Бендер: Крихітко, це звичайна планета, яких у Всесвіті безліч"
-					+ " <br> Ти намагаєшся встати з крісла, але розумієш, що ноги тебе не тримають, Ти падаєш, Бендер підхоплює тебе";
-		scena.img1 = "data:image/jpeg;base64,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";
-		
-		scena.nextScene = 21;
-		scena.prevScene = 9;
-		scena.Id = 11;
-		scenes[11] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Марс";
-		scena.whereAmI = "Станція Академік Вернацький. Марс";
-		scena.about = "Ти бачиш нову станцію, що побудувала Україна на Марсі";
-		scena.img1 = "https://i.pinimg.com/originals/2c/e4/66/2ce46670e8cd69672dbc368d0130304b.jpg";
-		scena.nextScene = 1000;
-		scena.prevScene = 11;
-		scena.Id = 21;
-		scenes[21] = scena;
-		
-		
-		
-		
-		/*scena = new Object();
-		scena.pass = "не страшно";
-		scena.passOK = "Ракета Бендера: двигуни активовано, страрт через 5, 4, 3, 2, 1, 0...Старт!";
-		scena.passNotOK = "Крихітко, тобі не страшно йти спати з роботом?";
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Каюта корабля";
-		scena.about = "Ти зайшла до каюти корабля разом з Бендером. "
-					+ " <br> Бендер: ";
-		scena.img1 = "https://i.pinimg.com/originals/fd/bf/fd/fdbffdabf7e532838241f31e3434e408.jpg";
-		scena.nextScene = 13;
-		scena.prevScene = 6;
-		scena.Id = 12;
-		scenes[12] = scena;
-		
-		
-		scena = new Object();
-		scena.pass = "не страшно";
-		scena.passOK = "Крихітко, а мені подобається такий розклад";
-		scena.passNotOK = "Крихітко, тобі не страшно йти спати з роботом?";
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Каюта корабля";
-		scena.about = "Ти зайшла до каюти корабля разом з Бендером. "
-					+ " <br> Бендер: ";
-		scena.img1 = "https://i.pinimg.com/originals/fd/bf/fd/fdbffdabf7e532838241f31e3434e408.jpg";
-		scena.nextScene = 1000;
-		scena.prevScene = 12;
-		scena.Id = 13;
-		scenes[13] = scena;*/
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Рубка управління корабля";
-		scena.about = "Бендер: Давай у щось пограємо, у мене є карти, можемо зіграти на роздягання, гигиги"
-					+ " <br> Бендер: ще є шашки, шахи, доміно, манчкін, підземелля і дракони....а це що, а нарди."
-					+ " <br> Бендер: що тобі до вподоби?";
-		scena.img1 = "https://ua.all.biz/img/ua/catalog/2474109.jpeg";
-		scena.Yes_val = "карти";
-		scena.Yes_scene = 13
-		scena.Ch1_val = "шашки";
-		scena.Ch1_scene = 13
-		scena.Ch2_val = "шахи";
-		scena.Ch2_scene = 13
-		scena.Ch3_val = "манчкін";
-		scena.Ch3_scene = 13
-		scena.Ch4_val = "підземелля і дракони";
-		scena.Ch4_scene = 13
-		scena.No_val = "нарди";
-		scena.No_scene = 13
-		//scena.nextScene = 13;
-		scena.prevScene = 6;
-		scena.Id = 12;
-		scenes[12] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Рубка управління корабля";
-		scena.about = "Ви граєте у гру, тобі щастить, ти знову і знову виграєш "
-					+ " <br> Бендер: Мішок з кістками, щось мені надокучило грати, піду відпочину, ти за головну!"
-					+ " <br> Бендер насвистуючи виходить. Ти починаєш хвилюватися, адже не знаєш, що може трапитися і що роботи!!!";
-		scena.img1 = "http://www.anypics.ru/pic/201210/480x800/anypics.ru-13763.jpg";
-		
-		scena.Yes_val = "ти спокійна, бо Бендер пожартував";
-		scena.Yes_scene = 15
-		scena.No_val = "ти панікуєш";
-		scena.No_scene = 14
-		//scena.nextScene = 1000;
-		scena.prevScene = 12;
-		scena.Id = 13;
-		scenes[13] = scena;
-		
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Рубка управління корабля";
-		scena.about = "Бендер повертається. <br> Бендер: Крихітко, нічого не натискай, корабель прямує до Марсу в автоматичному режимі,<br> якщо щось трапиться він нас повідомить, не хвилюйся"
-					+ " <br> Бендер: Я піду у свою каюту трішки розслаблюся";
-		scena.img1 = "https://live.staticflickr.com/4122/4803384409_cbed57b90e_b.jpg";
-		
-		scena.nextScene = 15;
-		scena.prevScene = 13;
-		scena.Id = 14;
-		scenes[14] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Рубка управління корабля";
-		scena.about = "Ти сидиш тут уже 15 хвилин. Дивишся у вікно і бачиш зоряне небо. На горизонті Марс, але його видно ледь більшим за зірки"
-					+ " <br> Ти нудишся";
-		scena.img1 = "https://cdn.fishki.net/upload/post/2019/02/26/2891080/0eolzjgumsnymmz2vcbyifp0sqapd8ihbpqul6q.png";
-		//scena.nextScene = 16;
-		scena.prevScene = 14;
-		scena.Yes_val = "піти спати";
-		scena.Yes_scene = 7
-		scena.No_val = "пройтися";
-		scena.No_scene = 16
-		scena.Id = 15;
-		scenes[15] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Коридор корабля";
-		scena.about = "Ти йдеш по коридору і бачиш прочинені двері каюти Бендера";
-		scena.img1 = "https://illustrators.ru/uploads/illustration/image/1040922/main_interior_of_the_Mysterious_Civilization_spaceship.jpg";
-		//scena.nextScene = 16;
-		//scena.prevScene = 14;
-		scena.Yes_val = "Назад";
-		scena.Yes_scene = 15
-		scena.No_val = "увійти у каюту";
-		scena.No_scene = 17
-		scena.Ch4_val = "піти далі до своєї каюти";
-		scena.Ch4_scene = 7
-		scena.Id = 16;
-		scenes[16] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Каюта Бендера";
-		scena.about = "Ти заходиш до каюти Бендера, на ліжку лежить 'блискучий зад' Бендера. Бендер співає у душі, це так мило, ти посміхаєшся. Двері у ванну кімнату прочинені, ти можеш побачити як миється голий робот. Ти ж не зазирнеш туди, правда?";
-		scena.img1 = "https://i.pinimg.com/originals/54/82/f8/5482f865b4478ff94674ef4f136e64b0.jpg";
-		//scena.nextScene = 16;
-		//scena.prevScene = 14;
-		scena.Yes_val = "Повернутися";
-		scena.Yes_scene = 16
-		scena.No_val = "Зазирнути";
-		scena.No_scene = 18
-		scena.Id = 17;
-		scenes[17] = scena;
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Ванна кімната Бендера";
-		scena.about = "Ти заглядаєш у ванну кімнату";
-		scena.img1 = "https://24tv.ua/resources/photos/news/201912/1244474.jpg?1575564837000";
-		//scena.nextScene = 16;
-		//scena.prevScene = 14;
-		scena.Yes_val = "Мені менше 18";
-		scena.Yes_scene = 17
-		scena.No_val = "Мені більше 18";
-		scena.No_scene = 19
-		scena.Id = 18;
-		scenes[18] = scena;
-		
-				scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Ванна кімната Бендера";
-		scena.about = "Ти бачиш голого Бендера Родрігеса, який .... миє посуд"
-					+ " <br> Він тебе не помічає";
-		scena.img1 = "https://cdn.drawception.com/images/panels/2012/4-4/BwyQKO2P3P-2.png";
-		//scena.nextScene = 16;
-		//scena.prevScene = 14;
-		scena.Yes_val = "Повернутися у рубку";
-		scena.Yes_scene = 20
-		scena.Id = 19;
-		scenes[19] = scena;
-		
-		
-		
-		scena = new Object();
-		scena.whereSpace = "Шлях до Марсу";
-		scena.whereAmI = "Коридор корабля";
-		scena.about = "Ти не можеш забути побачене. Тепер ця картинка переслідуватиме тебе";
-		scena.img1 = "https://illustrators.ru/uploads/illustration/image/1040922/main_interior_of_the_Mysterious_Civilization_spaceship.jpg";
-		scena.nextScene = 15;
-		scena.prevScene = 19;
-		scena.Id = 20;
-		scenes[20] = scena;
-		
-		
-		
-		
-		
-		let scena1000 = new Object();
-		scena1000.whereSpace = "Тут ще нічого немає";
-		scena1000.whereAmI = "...";
-		scena1000.about = "Можете щось сказати, можливо це вплине на сюжет";
-		scena1000.img1 = "https://i.ytimg.com/vi/Pr4zKFXvFcU/hqdefault.jpg";
-		//scena1000.nextScene = null;
-		scena1000.prevScene = 6;
-		scena1000.Id = 1000;
-		scenes[1000] = scena1000;
-		
-		function loadScene(scena){
-			
-			if("12" == $("#message").val().toLowerCase()){
-				$("#message").val("");
-				loadScene(scenes[16]);
-				return;
-			}
-			if (currentScena != null){
-				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "&nextScenaId=" + scena.Id + "&message=" + $("#message").val() + "&lastButtonVal=" + lastButtonVal);
-			}
-			
-			if(("pass" in scena) && (scena.Id > currentScena.Id)) {
-				if(scena.pass == $("#message").val().toLowerCase()){
-					alert(scena.passOK);
-				}else{
-					alert(scena.passNotOK);
-					return;
-				}					
-			}
-			
-			currentScena = scena;
-			/*if ($("#message").val() != ""){
-				alert("ти сказала: " + $("#message").val());
-			}*/
-			$("#whereSpace").html(scena.whereSpace);
-			$("#whereAmI").html(scena.whereAmI);
-			$("#about").html(scena.about);
-			$("#img1").attr("src",scena.img1);
-			//$('#buttonNext').click(function() { alert(scena.nextScene); loadScene(scenes[scena.nextScene]); });
-			//$('#buttonPrev').click(function() { alert(scena.prevScene); loadScene(scenes[scena.prevScene]); });
-			if(("nextScene" in scena)){document.getElementById("buttonNext").onclick = function() { lastButtonVal = $('#buttonNext').prop('value'); loadScene(scenes[scena.nextScene]); };}
-			if(("prevScene" in scena)){document.getElementById("buttonPrev").onclick = function() { lastButtonVal = $('#buttonPrev').prop('value'); loadScene(scenes[scena.prevScene]); };}
-			$('#buttonNext').prop('hidden', !("nextScene" in scena));
-			$('#buttonPrev').prop('hidden', !("prevScene" in scena));
-			//$('#buttonNext').prop('disabled', scena.nextScene == null);
-			//$('#buttonPrev').prop('disabled', scena.prevScene == null);
-			$('#buttonSay').prop('hidden', scena.Id != 1000);
-			
-			$('#buttonYes').prop('hidden', !("Yes_val" in scena));
-			$('#buttonNo').prop('hidden', !("No_val" in scena));
-			$('#buttonCh1').prop('hidden', !("Ch1_val" in scena));
-			$('#buttonCh2').prop('hidden', !("Ch2_val" in scena));
-			$('#buttonCh3').prop('hidden', !("Ch3_val" in scena));
-			$('#buttonCh4').prop('hidden', !("Ch4_val" in scena));
-			$('#buttonYes').prop('value', scena.Yes_val);
-			$('#buttonNo').prop('value', scena.No_val);
-			$('#buttonCh1').prop('value', scena.Ch1_val);
-			$('#buttonCh2').prop('value', scena.Ch2_val);
-			$('#buttonCh3').prop('value', scena.Ch3_val);
-			$('#buttonCh4').prop('value', scena.Ch4_val);
-			if(("Yes_scene" in scena)){document.getElementById("buttonYes").onclick = function() {lastButtonVal = $('#buttonYes').prop('value');  loadScene(scenes[scena.Yes_scene]); };} 
-			if(("No_scene" in scena)){ document.getElementById("buttonNo").onclick = function()  {lastButtonVal = $('#buttonNo').prop('value');  loadScene(scenes[scena.No_scene]); };} 
-			if(("Ch1_scene" in scena)){document.getElementById("buttonCh1").onclick = function() {lastButtonVal = $('#buttonCh1').prop('value');  loadScene(scenes[scena.Ch1_scene]); };} 
-			if(("Ch2_scene" in scena)){document.getElementById("buttonCh2").onclick = function() {lastButtonVal = $('#buttonCh2').prop('value');  loadScene(scenes[scena.Ch2_scene]); };} 
-			if(("Ch3_scene" in scena)){document.getElementById("buttonCh3").onclick = function() {lastButtonVal = $('#buttonCh3').prop('value');  loadScene(scenes[scena.Ch3_scene]); };} 
-			if(("Ch4_scene" in scena)){document.getElementById("buttonCh4").onclick = function() {lastButtonVal = $('#buttonCh4').prop('value');  loadScene(scenes[scena.Ch4_scene]); };} 
-			
+	var s_light = new THREE.SpotLight( 0xFFFFFF);
+	s_light.position.set( 0, 400, 200 );
+	s_light.target.position.copy( this.scene.position );
+	s_light.castShadow = true;
+	s_light.intensity = .8;
+	s_light.shadowDarkness = .7;
 
-			$("#message").val("");
+	lights.push(s_light);
+
+	for (var i = 0; i < lights.length; i++) {
+		this.scene.add(lights[i]);
+	}
+
+	return lights;
+};
+
+
+Game.prototype.render = function() {
+
+	this.handle_keys();
+	this.update_camera();
+	this.update_hud();
+	this.lander.update_thrust();
+	this.lander.update_flames();
+	this.handle_fuel_alert();
+	this.handle_landing();
+
+	if (this.game_started){
+		this.lander.mesh.setLinearFactor(new THREE.Vector3(1, 1, 1));
+		this.update_time();
+		this.handle_reset();
+		this.terrain.update(this.scene, this.camera.position);
+	}
+	else {
+		this.lander.mesh.setLinearFactor(new THREE.Vector3(0, 0, 0));
+	}
+
+	this.scene.simulate();
+	this.renderer.render( this.scene, this.camera );
+	this.render_stats.update();
+	requestAnimationFrame( this.render.bind(this) );
+};
+
+Game.prototype.update_time = function() {
+	var current_time = new Date();
+	this.elapsed_time = current_time - this.start_time;
+};
+
+Game.prototype.get_simple_time = function() {
+	var elapsed = this.elapsed_time;
+	elapsed /= 1000;
+	var seconds = Math.round(elapsed % 60);
+
+	elapsed = Math.floor(elapsed / 60);
+	var minutes = Math.round(elapsed % 60);
+
+	var simple_time = ("0" + minutes.toString()).slice (-1) + ":" + ("00" + seconds.toString()).slice (-2) ;
+	return simple_time;
+};
+
+Game.prototype.handle_fuel_alert = function() {
+	if (this.lander.fuel < 150 && !this.landed) {
+		startBeeping();
+		this.message = "Мало пального";
+	}
+};
+
+Game.prototype.handle_keys = function() {
+	if (this.game_started) {
+		this.lander.thrust_on = false;
+
+		if (this.keyboard.pressed("w") || this.keyboard.pressed("up") || this.keyboard.pressed(" ")) {
 			
-			if("mutable_part" in scena) {
-				$("#mutable_part").html(scena.mutable_part);
-			}else{
-				$("#mutable_part").html("");
+			if (!this.landed && this.lander.fuel > 0) {
+				this.lander.thrust_on = true;
+				this.lander.apply_thrust();
 			}
 			
 		}
-		loadScene(scenes[0]);
-		document.getElementById("buttonPrev").onclick = function() { loadScene(scenes[1000]); };
-				 
-function httpGet(theUrl)
-{
-	if(debug == 0)	{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", theUrl, true ); // false for synchronous request
-    xmlHttp.send( null );
-    //return xmlHttp.responseText;
+
+
+		if (this.keyboard.pressed("a") || this.keyboard.pressed("left")) {
+			this.lander.rotate_left();
+		}
+		if (this.keyboard.pressed("d") || this.keyboard.pressed("right")) {
+			this.lander.rotate_right();
+		}
+	}
+	else {
+		this.lander.thrust_on = true;
+
+		if (this.keyboard.pressed(" ")) {
+			this.game_started = true;
+			this.message = "";
+		}
+	}
+
+	if (this.keyboard.pressed("1")) {
+		this.render_stats.domElement.hidden = false;
+	}
+};
+
+Game.prototype.handle_collision = function(other_object, relative_velocity, relative_rotation) {
+	var vel = relative_velocity.length();
+
+	if (!this.landed) {
+		this.landing_vel = vel;
+		this.landing_angle = this.lander.mesh.rotation.z;
+		this.landing_time = new Date();
+		this.landed = true;
+	}
+	else {
+		this.landing_vel = Math.max(vel, this.landing_vel);
+	}
+
+	if (vel > 32) {
+		this.message = "Крихітко, ти можеш краще";
+		this.game_status = "GAME OVER";
+		this.landing_type = 2;
+		this.lander.flames_on = true;
+		playExplosion();
+		this.assigned_score = true;
+	}
+	else if (vel > 16) {
+		playHard();
+	}
+	else {
+		playLand();
 	}
 }
-  
-    </script>
-  </body>
-</html>
+
+Game.prototype.handle_landing = function() {
+
+	if (this.landed) {
+		var current_time = new Date();
+		var angle_diff = Math.abs(this.lander.mesh.rotation.z - this.landing_angle);
+		if (current_time - this.landing_time > 2000 && !this.assigned_score) {
+			console.log(angle_diff*180/Math.PI);
+			
+			/*if((landing_vel > localStorage.getItem("landing")) ||( (localStorage.getItem("landing") === null))){
+				localStorage.setItem("landing", landing_vel);
+			}
+			 */
+			if (angle_diff*180/Math.PI > 20) {
+				this.message = "Крихітко, завелеке відхилення";
+				this.game_status = "GAME OVER";
+				this.landing_type = 2;
+				this.lander.flames_on = true;
+			}
+			else if (this.landing_vel > 16 && this.landing_vel < 32) {
+				this.message = "Трохи зажорстко, але уже краще!!!";
+				this.game_status = "GAME OVER";
+				this.score += 50;
+				this.landing_type = 1;
+				
+			}
+			else if (this.landing_vel < 16) {
+				this.message = "Крихітко, ти Молодчинка!!!";
+				this.score += 100;
+				this.landing_type = 0;
+				
+			}
+			this.landing_vel = 0;
+			this.landing_angle = 0;
+			this.assigned_score = true;
+		}
+	}
+};
+
+Game.prototype.handle_reset = function() {
+	if (this.landed) {
+		var current_time = new Date();
+		if (current_time - this.landing_time > 5000) {
+			this.lander.reset_lander(this.scene);
+			this.lander.mesh.addEventListener( 'collision', this.handle_collision.bind(this));
+			this.landed = false;
+			this.message = "";
+			this.game_status = "";
+			stopBeeping();
+			this.assigned_score = false;
+
+			this.terrain.reset_terrain(this.scene);
+			
+			//Perfect
+			if (this.landing_type == 0) {
+
+			}
+			//Hard + Catastrophic 
+			else {
+				this.score = 0;
+				this.lander.fuel = this.lander.start_fuel;
+				this.start_time = new Date();
+				this.game_started = false;
+				this.message = this.start_message;
+				this.elapsed_time = 0;
+			}
+		}
+	}
+}
+
+Game.prototype.update_camera = function() {
+	this.camera.position.x = this.lander.mesh.position.x;
+	this.camera.position.y = 100;
+	this.camera.position.z = Math.min(Math.max(2*this.lander.mesh.position.y + 50, 50), 1000);
+
+	this.camera.lookAt(this.lander.mesh.position);
+};
+
+var game = new Game();
+window.addEventListener("load", game.init.bind(game));
