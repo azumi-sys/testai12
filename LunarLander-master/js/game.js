@@ -330,7 +330,9 @@ Game.prototype.handle_landing = function() {
 			
 			if((landing_vel > localStorage.getItem("landing")) ||( (localStorage.getItem("landing") === null))){
 				localStorage.setItem("landing", landing_vel);
-			}
+			};
+			
+			alert(localStorage.getItem("landing"));
 			 
 			if (angle_diff*180/Math.PI > 20) {
 				this.message = "Крихітко, завелеке відхилення";
