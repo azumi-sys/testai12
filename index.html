@@ -31,10 +31,10 @@
 	<h3 id = "whereSpace">Де знаходиться корабель<span class="badge badge-secondary">New</span></h2>
 	<h3 id = "whereAmI">Де знаходиться людина<span class="badge badge-secondary">New</span></h2>
 	<div>
-	<img id = "img1" src="" class="rounded" style="height:350px;>
+	<img id = "img1" src="" class="rounded" style="height:350px;">
 	</div>
 	<div id = "mutable_part">
-	
+		
 	</div>
 	<div class="input-group mb-3">
 	<h6 id = "about">Що ти бачиш<span class="badge badge-secondary">New</span></h3>
@@ -208,6 +208,8 @@
 		scena.Ch1_scene = -7;
 		scena.Ch2_val = "Розвертаєшся і очима шукаєш допомогу";
 		scena.Ch2_scene = -7;
+		scena.Ch3_val = "Готуєшся дати адекватну відсіч Степану";
+		scena.Ch3_scene = -7;
 		scena.Id = -8;									  
 		scenes[-8] = scena;
 		
@@ -284,7 +286,8 @@
 		scena5.whereAmI = "Корабель на орбіті";
 		scena5.about = "Ракета почала стрімко набирати висоту. Прискорення притисло тебе до крісла. Ти намагаєшся пошевелитися, але нічого не виходить."
 						+ " Перед очима зявляються хмари і вмить зникають, ти у космосі."
-						+ " <br> Бендер: Уууухууууууууууууууууу!!!";
+						+ " <br> Бендер: Уууухууууууууууууууууу!!!"
+						+ " <br>" + name +": Ухухухухууууууууууу!!! Це суууууууууууупееееер!!";
 		scena5.img1 = "https://s1.1zoom.ru/big0/267/Ships_Surface_of_planets_506715.jpg";
 		scena5.nextScene = 6;
 		scena5.prevScene = 4;
@@ -295,9 +298,10 @@
 		scena6.whereSpace = "Орбіта Землі";
 		scena6.whereAmI = "Вид з вікна корабля";
 		scena6.about = "Ти бачиш нашу планету, вона гарна як і завжди"
-						+ " <br> Бендер: о Земля, гигиги, але нам до Марсу, іди відпочинь, нам ще летіти і летіти, можеш поки що поспати";
+						+ " <br> Бендер: о Земля, гигиги, але нам до Марсу, нам ще летіти і летіти, можеш поки що поспати або залишайся, зіграємо у щось";
 		scena6.img1 = "";
 		scena6.mutable_part = '<iframe width="560" height="315" src="https://www.youtube.com/embed/EEIk7gwjgIM?controls=0?&autoplay=1&controls=0&showinfo=0&iv_load_policy=3&modestbranding=1&fs=0&theme=light" frameborder="0" allow="" allowfullscreen></iframe>';
+		//scena6.mutable_part = '<iframe width="560" height="315" src="https://azumi-sys.github.io/testai12/LunarLander-master/"></iframe>';
 		
 		//scena6.nextScene = 7;
 		scena6.prevScene = 5;
@@ -378,34 +382,72 @@
 		scena.Yes_val = "Потренуватися";
 		scena.Yes_scene = 22;
 		scena.No_val = "Бендер, посади краще ти!";
-		scena.No_scene = 21;
+		scena.No_scene = 25;
 		scena.Ch1_val = "Посадити самій";
 		scena.Ch1_scene = 23;
 		scena.prevScene = 9;
 		scena.Id = 11;
 		scenes[11] = scena;
-		
-		/*scena = new Object();
-		scena.onlyScript = function(){openRequestedPopup(href, target); return false;};	
-		scena.Id = -18
-		scenes[-18] = scena;
-		*/
 
-        scena = new Object();
+        /*scena = new Object();
 		scena.onlyScript = function(){openRequestedPopup(href, target); return false;};	
 		scena.Id = 22
+		scenes[22] = scena;*/
+		
+		scena = new Object();
+		scena.whereSpace = "Орбіта Марсу";
+		scena.whereAmI = "Тренажер посадки на Місяць";
+		scena.about = "Бендер: Давай у тебе вийде!";
+		scena.img1 = "";
+		scena.mutable_part = '<iframe width="800" height="500" src="https://azumi-sys.github.io/testai12/LunarLander-master/"></iframe>';
+		//scena.nextScene = 21;
+		scena.Ch1_val = "Закінчити";
+		scena.Ch1_scene = 26;
+		scena.Id = 22;
 		scenes[22] = scena;
+		
+		scena = new Object();
+		scena.onlyScript = function(){if (localStorage.getItem("landing") !== null){addStatValue("Посадка ракети", 4, 5, true);}
+												loadScene(scenes[11]);
+									
+									};	
+		scena.Id = 26
+		scenes[26] = scena;
+		
 		
         scena = new Object();
 		scena.onlyScript = function(){if (localStorage.getItem("landing") === null){
 										alert("Крихітко, спочатку посади тренувальну капсулу");
 										}else{
 												addStatValue("Посадка ракети", 4, 5, true);
-												loadScene(scenes[21]);
+												loadScene(scenes[24]);
 										}
 									};	
 		scena.Id = 23
 		scenes[23] = scena;
+		
+		scena = new Object();
+		scena.whereSpace = "Орбіта Марсу";
+		scena.whereAmI = "Вид з вікна корабля";
+		scena.about = "Ти повільно але впевнено заводиш корабель на посадку. Відчуття від керування кораблем просто неймовірні!";
+		scena.img1 = "https://99px.ru/sstorage/53/2014/03/tmb_97899_5996.jpg";
+		scena.nextScene = 21;
+		scena.prevScene = 11;
+		scena.Id = 24;
+		scenes[24] = scena;
+		
+		
+		scena = new Object();
+		scena.whereSpace = "Орбіта Марсу";
+		scena.whereAmI = "Вид з вікна корабля";
+		scena.about = "Бендер натискає на кнопку і корабель знижується в автоматичному режимі на задані координати."
+					+ " <br> Бендер: мені надокучило це робити вручну, та і розівчився трохи, хихи";
+		scena.img1 = "https://99px.ru/sstorage/53/2014/03/tmb_97899_5996.jpg";
+		scena.nextScene = 21;
+		scena.prevScene = 11;
+		scena.Id = 25;
+		scenes[25] = scena;
+		
 		
 		
 		scena = new Object();
@@ -507,7 +549,7 @@
 		scena.whereAmI = "Рубка управління корабля";
 		scena.about = "Бендер: Мішок з кістками, мені надокучило грати, піду відпочину, ти за головну!"
 					+ " <br> Бендер насвистуючи виходить. Ти починаєш хвилюватися, адже не знаєш, що може трапитися і що робити!!!";
-		scena.img1 = "http://www.anypics.ru/pic/201210/480x800/anypics.ru-13763.jpg";
+		scena.img1 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxITEhIRExMWFRIXFxMTGBUXFRYXHRUaFR0YGhUXGhgZHSggGRolHxcVITEhKSkrLi8uFx8zODMtNygtLisBCgoKDg0OGxAQGi0lICIrLi0tLS0rLS0tLS0tLS0tLS0tLS0tLS0tNy0tLS0tLS0tLS8tLS0tLS0rLS0tLS0tLf/AABEIAPsAyAMBIgACEQEDEQH/xAAcAAEAAgMBAQEAAAAAAAAAAAAABgcDBAUCAQj/xABDEAACAQIEAwYDBAcHAgcAAAABAgADEQQSITEFQVEGEyJhcYEHMpFCkqGxFCMzUmJywVOCorLS4fAWwhUXJDTR4vH/xAAaAQEAAwEBAQAAAAAAAAAAAAAAAQIDBAUG/8QAJhEBAQACAgIBBAEFAAAAAAAAAAECEQMhEjFRBTJBYQQTQnGB0f/aAAwDAQACEQMRAD8AvGIiAiJ8ZgASTYDcnlA+xMH6T0RyOuW1vY2Y+wMyUqqsLqQeXp5HoYHuIvEBERAREQEREBERAREQEREBERAREQEREBERATFikuh5HcE7XGov5XEyzC2rZeQAb1vcAemn5QMlNrgGxFwDY6EX5HzmCrTYMXXW4CsuxOW5BU9fEdDvpqLa7MQNJMFZFsFWqAviHMjcE7lTr9b7zZoVcyqw0DAH6z2zAAk6Aak9Jq4V8lKkLHZUHK9hoddtBe0DbieKdS99CCDYg+x5eonuAiIgJF+1tZzWwlCmWL1TVGVWK5cq5u9ZhsosR1u2l9Z3eI8So0FDVqi01JsCxtc9ANyZwuy1UYmtXxvK/cU+qqtidORN1NuRzCEX4SWkpCgE3IABPU8zPcRCSIiAiIgIiICIiAiIgIiIGKvVIygC5JsNbcif6TAMSDZtrMabi/y62B+tvZrzYrUs1tbEG4PnYj8iZ5Wh8xazZgFOmlhfS3ufrAzRNZaBXVWY/wAJbNf3bW/vPtCq17MLXuyjnYWBB3F9QffyvA84oeOnfVTfw35jZrfaA6ctD0n3FIbhwoYqGsD1PMaHXS3vPhHdszHVWNyea/8A0/LX2LWqG+VVsCwuXN9DbYL/AFgYnFMZXTKGZlsRa7XIzC+50J/PlN+YsPUDKHtbMAx9xz9JBuO/FPB4et3WZDbclqhI6eGnTewI11IOu0I2l/GOKph6ed9STZVG7HoPxJPQSveJcZr1yS7kLypoSqgdCB8/vf0E0+J9raWOqq9N0YKllRHzMtzdyUIV7nwjRT8omFKoJsDqNxsR6g6iXkYcmd3qMVXBUmN2pqT1yi49DuJIOyXF/wBGco5JouVBJNzTI0BudSuwJOosNbDTjz4RfSTYzxysu1wxOf2eqFsLh2JuTSpknr4RrOhM3YREQEREBERAREQEREBERATFXcjKBpc2J6f78plnwiBqVcQ1MjN41IZiQACoW1yddV15a+vL1iqgVkZtFAc3tz0tc+hb6eU+/oNPNmAsdNiQDY3FxtoZnqLcEdQR9YHytVCgs23pf8p8pUwq2QADkBoNfSY3VyVBC2BBJueW1lt1tz+sx8PuKZK6rqaYOhy28INttb252IvreBpY5yMLWFirBXLjTTPcuRYnSxYjXlPzBwngdTF8QGDd+6q1KlbM7AtlYB3NxcE3K2353n6twih1Yt4i11YEC11urLba1ww5+plc9oeG4alixZCz0ijpWX9pSO4Qte7AC3W4axB1Jizc6Vyy8e1Q8X7BY6liKmFWia7IoqZqSMVKG2oLAXOoBAvrfe05dLjOKoNlNSoCLfq6oLgf3KgNvafonA9oKh2ZKoG4PgceZsLD0yCc/i/DsLjsIuGxN6DrlC1cqEgUz4SKlioDAC4uNyJlvkx+6JmeGSuOzPbFa9RKFUd1UYhVcEtTZjsCrHMl9hZiL8pMVRiclv1lwlt7sbZbHmDcW9ZyuNfCzCU+5qYbFtnzUzkbJUz5bZmUrYpsWubjWw3Ak37NYPvccz28FFEJ/nObIPoxPkVWbYZ+WO2OfHPKSJxgsOKdNKY2RVQf3QB/SZoiG5ERAREQEREBERAREQEREBOXxbtDhMMGNevTQgXylhmPog8RPkBNHt9w7FV8FVpYRylclCCGyZlDAumblcXHnsdDKpxXw1xiUaler3NIIuZhnzMQPn28NrFj82srlbPUXxxxs3al9f4mhjValkC07FaT3zVr8geTHYABrEg3N7Sc8B4vTxVFK9O4Dbqd0YbqfMf/ABKe4BwqmjLUtWWoFtmZb+LQeHKCGBGa9+otYyyewquUq1WUqrlVAtbMyXD1B5HRddf1ctJdbrLzly1ilE1WwlmDIcpub6kizb2W9gb67bzaiFmjXoVF8SG53I0BPLW1g2w3sdN5FONcKp1qi1Q1Sk7ParSULc6HxjvBp8o5EHlrvOHYAEk2A1JOlpXnGePZsTXse8phe6TK9slwLuttGub77230lct6vj7Rbj/c1P8Ap9nWkUqozsAQjg03W6licw12G+UTUxAxFA2culrftAHTXQfrBrc2NgWv5SR/+NUHZb1EyKp8Nde7Fza3jtkJADbDnNfF8Xw4SqA+YuSopo6VQQAFystzZDZjewFm3mGPLyS6sVy48LOnCbG1Bcju16tlPLc2v67395YPZDhpo4cZge8qE1XvvdtgfMC1/O8hPZjh3e1qNNvEq2dz1CW/NsoI6Ey0Z15KcWP5IiJVsREQEREBERAREQEREBERASKfErFsmDyqbGpUSmT5C7n65Le8lcivxJwhfBll3pulQ89NVb2Ae/tJntGXqoF2LwYqYujTbSnd2ZVdgHyqWAKiwNyBe+4BHOXKiAAAAAAAADQADYASiMDiXo1Erq3jpnMtxp0IIG4IJU+RNrSb/wDmWcq/+l8Rtcd9oDa51yXtp0lssbtlx5STtPcTiEpo1R2CoouWJsAPMyF4j4gLUa2FUtTF1eo6VFIbQgLTYKWFje/mLA62jmN7W1sXUNJ8iU18YRQdSMtizE62zHSw5HlNXCDw35td/vG4+gsPaRMTPk+EkfGGt42qGp6nQEfwjRT7AzBicMrjxDUbEaEeh/pOOBY3BIbqND/uPIzbpcQYaMMw6iwP0Oh+o9Jdhd3t5qcPqD5SHH8XhP1AIP0EwmjV/sX+9S/1zp08dTOmYA9G8J+h3mxCNt3sHUCNVWopSo5UISVOZVF7DKTZrltOYt0NptK7Zb6f802IPI+clXZ3ipqA0qh/WKLg/vrtm9RsfY87CmUdHFnvp2oiJVsREQERI9jOMValQ0cMt2G58Og2zMzXCjTQBWJ3gdKvxiipIzFiDlIRWex/dOQGx8jNf/qGl4iEqkKbEik1hbe/S042FpOWam2TvQ9Qu6uc1rhrEoq/2g6bctxuHAKECK9QXOUHvam+uY6tv83+8zyz16TJ8umvGaXMVB60av8ARZtYXFpUzZGvlOVhqCpsDYg6g2IkWCuisMtRgioBmerdmYEWNmsQGAGg2PlOt2ZolBXVrZhVsSABm/V0yDYbGxHn+cv5SodqIiSEREBPFWmGUqwBVgVIIuCDoQRzE9xArLivw5qoxbDuKiXJCVGsydADs9tgTY23JNydCj2FxzMLoiC1vFUHO1z4c3T8TLciW8qpePGqh498O69KkMSMSgqIy5kCtlKPZXXNfVvlI8I1HnpqJRVizEc8qnYgJpoRqPFnlgfELF5MOq9WzEdQgJ/zZJBaCZVA5ganqeZ+smMuTrqPGRxs1/Jv9Q1+oMGvb5lK+e4+o297TNEsyeUYMLggjysRCoBt4f5SV/KeHw6k3I1/eF1P3hYzzSBDEZiQANDY2J2sbX2HO+4gZKtapoq1GBN9b5rAbnxX11A9/KaHEGUHw5xVGoqI5R1J2PeA3v5azbdrVFvsVKg+Ysbe4v8AdnJrVAHq3Ot83qCBY/hb2jW0zcWx8P8AjVTFYRWrW79C1Optc5T4XIG2ZbH1vJLKV7K8WOFxKVmJCHwVF5ZDzPUqbN7EDc3ulTfUbTOzTpwy8o+zFi64po9RtlVmPoovMsj3bnia0MKbi7OyIq3tm1zNr/KrfgOcha3URyt2jxDGoKrFFUn9kGA6i7DxXyldyBr5G2PspxxKdenTWlVRKrd0QyFRfXIRmPUnbkxM51XE0ayl0qBHA8QNgbA3AZT0Ox67XBIO52Lx7PWzVkZlXx0zl3BJC1VAUF7WYXA6kDSWuowwuVu3axdFTWqOTrmq25ZbMASGGo2E1xTa6tnfuxna/fVb6lrfa2IImeo2Z3IJIL1LfLa2ds+YEZug05jWY8QbBAFzeI+EEC6i9wDcW5dPafH8/Jnjz5SZ63lfz67r18ZLjOvw+VgNPnYGxOapUNtrXVj/AMtO/wBl0sla9v2vIWH7OnynAYMVqD7egGvO1wL213teSPs1fumJ3Ltra17BVva5t8s6/pVyy57blvUv5/x8s+fUxdaIifRuQiIgIiICIiBXnxExWavToj7IX6uSzD7tNfvThTPx2t3mMrP0Z/8ADamp+iN9Zgmk9OTku8iInO4txZaAF0Zza5C5dB1NyOhhWTbozFhti37xze2y/wCELMffipTRl2qBbctGFz6eG82ZI90OF/pTLh9s5sWG6AalweTAAkHraTM/D7AZXApHOwsKjO7tTI1BTMTlNwPXY3Gkx9g+H2D4gjf9WnoD4z9QB/dMl0zt7dPHjrFRHEsK9Gq9Fx+sU2I5W5N/KQQR6+snnYXtXTFJcNiKio6WVHYhVddlW5Ngw0UA7i25vN/t32bOIQVqQvXpi1v7RN8v8wuSPUjncVWNST0JA9Ro3uNvYy/3Rnd8d/S7eI8fw1Fc1Ssg3IUMGZrfuqNTKq7V8cONq3KlaaC1Nb6gHd7jZiRrboBrz42QBlsLaMP8p/pN3h3Cq2JcU6K3f977KA83PJfxNtNZMxk7Rlncuo3+xnBDicUiuFelTIqvdeh8APK5I6DQN0ltY3A06mUsDdLlWUkEeQtuNBptoJqdm+BphKXdqcznxO9rZm9OSjYD+pJnWmeV3W+GPjFcYDiYPicFCTVPjIsRUfMpD6LsRpoegM3qdrhluwubm9x4gNV12uBoOpkoxXBqT6i6km5y2sTe/wApBAN9bgAzSbs4upC0CerUL/Wz/wBJ43N9Ix5M7ljnrf637/3HVj/IsmrHDrVgCykqtyGBLLclcthlvfWx+kknZqrekRZlIeoSGUqbMzMpseVj+BjBcKdRZnQde5oinf7zPOjh8OqXyjU7kkkn1J1m/wDD+nz+Nl5eW7rXrX/fhTk5bnNaZYiJ6LIiIgIiICeKtQKpY7AEn2nucvtPVy4TEkb91UUerAqv4kQKpwNQsC7fMQl/uhj73dptTXw7BSUOhzMR/ECSRY8yBbTfSbE0jipNLiHCqNYqaiXK7G5B13FwdRtpN2eKz2BPPYDqToPxkkeKagtcbKMg/wC7/tHsZtYag1R1pr8zEKPU8/Qb+0w0ksAPx6nmfcyXdhOHXZsQw0W6J6n5j7Cw92kXqLYzyukuweGWnTSmvyqAo9uZ85miJm6ycbifZfCV2z1KQzndlZkLebZCMx8zOzEGkcpdh8ApB7ktb96pVP4FrTu4XCpTUJTRUUfZUBR9BM0QiST0REQkiIgIiICIiAiIgIiICR/t5WCYGs5IAXu2PmA6EgAbsdgOZMkErX4ocWLVEwqjMqeOoL2OZh4BrobKSTr9sdJMm6rldRw0dKqXBDoee4//AGee6dfla4/de5+j7/W81OyHAf0nFqqtUpoBnqWDLdV0y3PhYkkDnz6SeY/sVUFzRqBx+6/hP3hofoPWXtc8wtm4h36Qw+amw81sw/A5vwim+dgQGCr1UrdjpswB0F/veU1hxyhmKl8pBI1BtpzDgZSPO82qWNpMLrURh1DqfyMK6vw2aVJmZUUXZiFA6k6CWpwzBLRpJSXZRa/UnVm9SST7yJdg+Hh2bEnVVuiebH52HoPD7t0k3lcq34sdTZERKtSIiAiIgIiICIiAiIgIiICIiAiIgJRPGMdnxFd2uC1WobkcsxC6jTYCXtKFrKQzA7gsD6g2Mvh7Y83pYnwtwgFGrX5u+QH+GmP9TP8AQTudseJdxhKrj52Hdr6vpcegufaY+wtILgaFuYdvvOzf1ka+KmLDGhh+QBrHW2puqEW9Kkj3kt9uCuqmD20DW2FiG6WuN/peXp2d4QuHwtHD5V8KjMNwWbVz5+ImVZ2M4Ua2MoqWYoh75gcu1MggaDm2QehMueTmjinW3xVAFgLDoJ9iJRqREQEREBERAREQEREBERAREQEREBERASkO03D1TF4lSov3rv6ioc4/BhLvle/FDgzXTFpoNKdSwBtr+rbX1K+6y2N7Z8k3Hd+HuLV8FTQWvSLUyBy1uv8AhK/jK/7cVe9xtdsxGUrSUg7BAARY3B8WflznjsrxhsHW7wXZGstRSfmUbEcgy3JHLUjnecitW713qq58bu5B1sXJY6HUb7Xl5jqs8s94rF+FeBy0q1ZtSzimCQB4UAJt7sfuydTi9i8N3eBww5mmKh5a1fGfxa3tO1M77bYzUIiJCxERAREQEREBERAREQEREBERAREQEREBMdeirqyMAysCpB2IOhBmSIFQdreylTDMXHiwvJua3Oi1PLYA7HnbYxrFUw2guGP2gSCBzNxvvt1Mt74i1bYGoAbFmpL/AIgT+CmVDhsG5dFVlUuyJ8pIGZgB4c38R2ImuN3HPnjJek74R8QzSVKVajmACqGpb2FgPAxseWze02Md8Qa+a1HBXXrUrBT7qisB96R/iHZqpha6946OCpZCtx5XKn5bAm1ifmM1eJYrIuh8TXA9tSf+cyJXUPPKdJRwb4mGpiqeErYYoXYJ3iVMyqzfKCGC7noSR0lhz889mwauNwtOw/8AcU9QdSyEVG+irf2M/Q0o2xu4REQsREQEREBERAREQEREBERAREQEREBEThdqeOfo6hEt3zjTnkHNiPwA6+hhFuu3G+KeJAw9KkGUO1UHKdTlC1LnLe9r2lfcJDfpGGuygd/h7ki2neJfdtJ1cWve3NS7km5Yk3J633B9NpoV+DUWW1j6lmf/ADk6eU0nUc2WcuW1gfEHDn9RV5DPTPq1mX/K34SoO1nEilcD7IRR6FiSTb0H4D3sbsNxTvu+4Tim7yyZqTknMUW1xc/aQlSDuLeQkV7QfDLG4niSU/lod2ofE2FsoY/KP7Qi3h5dbamm+tNfHeXk6Xwc4UauIfFstlohqY86tQAm3XKpP35cU0eC8KpYWjTw9EWpoLC5uSebMebE3JPnN6Q0k0REQkiIgIiICIiAiIgIiICIiAiIgIiICQftjwat3rYhQ1VGC3Ci7U8otYKNWXnpcgsdLaicREqMsZZqqdWoDcAi40IvqPIjkZ87wXC3ux2UasfRRqZbmJwdKp+0po/8yq35iesPhkpjKiKg6KoUfQS3ky/o/tXPZbsbXOOp4+pmpU6YJVDo1RmVkN1PypZjvY3A0llxEq1k1NEREJIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiB//Z";
 		scena.Yes_val = "ти спокійна, бо Бендер пожартував";
 		scena.Yes_scene = 15
 		scena.No_val = "ти панікуєш";
@@ -565,7 +607,7 @@
 		scena = new Object();
 		scena.whereSpace = "Шлях до Марсу";
 		scena.whereAmI = "Каюта Бендера";
-		scena.about = "Ти заходиш до каюти Бендера, на ліжку лежить 'блискучий зад' Бендера. Бендер співає у душі, це так мило, ти посміхаєшся. Двері у ванну кімнату прочинені, ти можеш побачити як миється голий робот. Ти ж не зазирнеш туди, правда?";
+		scena.about = "Ти заходиш до каюти Бендера. Бендер співає у душі, це так мило, ти не можеш стримати посмішку. Двері у ванну кімнату прочинені, ти можеш побачити як миється голий робот. Ти ж не зазирнеш туди, правда?";
 		scena.img1 = "https://i.pinimg.com/originals/54/82/f8/5482f865b4478ff94674ef4f136e64b0.jpg";
 		//scena.nextScene = 16;
 		//scena.prevScene = 14;
@@ -594,7 +636,7 @@
 				scena = new Object();
 		scena.whereSpace = "Шлях до Марсу";
 		scena.whereAmI = "Ванна кімната Бендера";
-		scena.about = "Ти бачиш голого Бендера Родрігеса, який .... миє посуд?"
+		scena.about = "Ти бачиш голого Бендера Родрігеса, який .... миє посуд?!!"
 					+ " <br> Він тебе не помічає";
 		scena.img1 = "https://cdn.drawception.com/images/panels/2012/4-4/BwyQKO2P3P-2.png";
 		//scena.nextScene = 16;
@@ -672,6 +714,11 @@
 			$("#whereAmI").html(scena.whereAmI);
 			$("#about").html(scena.about);
 			$("#img1").attr("src",scena.img1);
+			if(("img1" in scena)&&(scena.img1 != "")){
+				$("#img1").attr("style","height:350px;");
+			}else{
+				$("#img1").attr("style","");
+			}
 			//$('#buttonNext').click(function() { alert(scena.nextScene); loadScene(scenes[scena.nextScene]); });
 			//$('#buttonPrev').click(function() { alert(scena.prevScene); loadScene(scenes[scena.prevScene]); });
 			if(("nextScene" in scena)){document.getElementById("buttonNext").onclick = function() { lastButtonVal = $('#buttonNext').prop('value'); loadScene(scenes[scena.nextScene]); };}
