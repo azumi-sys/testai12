@@ -633,12 +633,13 @@
 		scena.Id = 18;
 		scenes[18] = scena;
 		
-				scena = new Object();
+		scena = new Object();
 		scena.whereSpace = "Шлях до Марсу";
 		scena.whereAmI = "Ванна кімната Бендера";
-		scena.about = "Ти бачиш голого Бендера Родрігеса, який .... миє посуд?!!"
-					+ " <br> Він тебе не помічає";
-		scena.img1 = "https://cdn.drawception.com/images/panels/2012/4-4/BwyQKO2P3P-2.png";
+		scena.about = "Ти бачиш силует робота за шторкою. Бендер наспівує, та раптом зупиняється."
+					+ "<br> Бендер: Тут хтось є?... Крихітко, це ти? Потреш мені спинку?"
+					+ "<br> Ти помічаєш руку Бендера, він починає відкривати шторку. Ти не хочеш, щоб Бендер тебе тут побачив, потрібно мерщій повертатися у рубку";
+		scena.img1 = "https://c1.neweggimages.com/ProductImage/A6U5_1_201901171398241603.jpg";
 		//scena.nextScene = 16;
 		//scena.prevScene = 14;
 		scena.Yes_val = "Повернутися у рубку";
@@ -651,10 +652,11 @@
 		scena = new Object();
 		scena.whereSpace = "Шлях до Марсу";
 		scena.whereAmI = "Коридор корабля";
-		scena.about = "Ти не можеш забути побачене. Тепер ця картинка переслідуватиме тебе";
+		scena.about = "<br> Бендер (з ванної): отакої, нікого, треба буде сходити в техвідділ на Землі, якісь глюки зі слухом.";
 		scena.img1 = "https://illustrators.ru/uploads/illustration/image/1040922/main_interior_of_the_Mysterious_Civilization_spaceship.jpg";
 		scena.nextScene = 15;
 		scena.prevScene = 19;
+		scena.SkillBefore = function(){addStatValue("Підглядання", 1, 5, false);};	
 		scena.Id = 20;
 		scenes[20] = scena;
 		
@@ -689,7 +691,7 @@
 			
 			if("12" == $("#message").val().toLowerCase()){
 				$("#message").val("");
-				loadScene(scenes[11]);
+				loadScene(scenes[20]);
 				return;
 			}
 			if (currentScena != null){
