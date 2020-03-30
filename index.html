@@ -121,15 +121,16 @@
 		
 		
 		var stats = [];
+		loadStats();
 		
 		
-		prepareStats();
+		//prepareStats();
 		//var stat = new Object();
 		//stat.name = "Уміння фотографуватися у масці"
 		//stat.value = 4;
 		//stat.maxValue = 5;
 		//stats[0] = stat;
-		addStatValue("Уміння фотографуватися у масці", 4, 5);
+		addStatValue("Уміння фотографуватися у масці2", 4, 5);
 		
 		$("#namePerson").html(name + ": ");
 		
@@ -380,7 +381,7 @@
 		scena.img1 = "data:image/jpeg;base64,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";
 		//scena.nextScene = 21;
 		scena.Yes_val = "Потренуватися";
-		scena.Yes_scene = 22;
+		scena.Yes_scene = -122;
 		scena.No_val = "Бендер, посади краще ти!";
 		scena.No_scene = 25;
 		scena.Ch1_val = "Посадити самій";
@@ -388,6 +389,23 @@
 		scena.prevScene = 9;
 		scena.Id = 11;
 		scenes[11] = scena;
+		
+		scena = new Object();
+		scena.whereSpace = "Орбіта Марсу";
+		scena.whereAmI = "Вибір тренажера";
+		scena.about = "Бендер: Вибери тренажер, Крихітко.";
+		scena.img1 = "http://kidsgame.com.ua/wp-content/uploads/2014/09/redemptions.jpg";
+		//scena.nextScene = 21;
+		scena.Ch1_val = "Посадка на Місяць";
+		scena.Ch1_scene = 22;
+		scena.Ch2_val = "Облітати перешкоди";
+		scena.Ch2_scene = 28;
+		scena.Ch3_val = "Закінчити";
+		scena.Ch3_scene = 11;
+		//scena.prevScene = 11;
+		scena.Id = -122;
+		scenes[-122] = scena;
+
 
         /*scena = new Object();
 		scena.onlyScript = function(){openRequestedPopup(href, target); return false;};	
@@ -407,19 +425,58 @@
 		scenes[22] = scena;
 		
 		scena = new Object();
-		scena.onlyScript = function(){if (localStorage.getItem("landing") !== null){addStatValue("Посадка ракети", 4, 5, true);}
-												loadScene(scenes[11]);
+		scena.whereSpace = "Орбіта Марсу";
+		scena.whereAmI = "Тренажер по облітанню перешкод";
+		scena.about = "Бендер: Давай, я тримаю за тебе кулаки!";
+		scena.img1 = "";
+		scena.mutable_part = '<iframe width="800" height="500" src="https://azumi-sys.github.io/testai12/likeaflappybird/"></iframe>';
+		//scena.nextScene = 21;
+		scena.Ch1_val = "Закінчити";
+		scena.Ch1_scene = 26;
+		scena.Id = 28;
+		scenes[28] = scena;
+		
+		scena = new Object();
+		scena.onlyScript = function(){	var v = getStat("Керування ракетою");
+										var points = 2;
+										if(typeof v === 'undefined'){
+											points +=1;
+										}
+										if (localStorage.getItem("landing") !== null){
+											points +=1;
+										}
+										if (localStorage.getItem("landing2") !== null){
+											if(localStorage.getItem("landing2") > 1000){
+											points +=1;
+											}
+										}
+										addStatValue("Керування ракетою", points, 5, true);
+										loadScene(scenes[-122]);
+										/*if (localStorage.getItem("landing") !== null){addStatValue("Керування ракетою", 3, 5, true);}
+												loadScene(scenes[-122]);
+										if (localStorage.getItem("landing2") !== null){addStatValue("Керування ракетою", 3, 5, true);}
+												loadScene(scenes[-122]);*/
 									
 									};	
 		scena.Id = 26
 		scenes[26] = scena;
 		
 		
+		
+		/*var v = getStat("Уміння грати в настільні ігри");
+										if(typeof v === 'undefined'){
+										addStatValue("Уміння грати в настільні ігри", 1, 5, true);
+										}else{							
+														addStatValue("Уміння грати в настільні ігри", getStat("Уміння грати в настільні ігри").value +1, 5, true);
+										}*/
+		
+		
         scena = new Object();
-		scena.onlyScript = function(){if (localStorage.getItem("landing") === null){
-										alert("Крихітко, спочатку посади тренувальну капсулу");
+		scena.onlyScript = function(){var v = getStat("Керування ракетою");
+										if ((typeof v === 'undefined')||(v.value < 3)){
+										alert("Крихітко, спочатку посади тренувальну капсулу або облети перешкоди, набереш 3 зірки і я тобі дозволю взяти штурвал");
 										}else{
-												addStatValue("Посадка ракети", 4, 5, true);
+												//addStatValue("Посадка ракети", 4, 5, true);
 												loadScene(scenes[24]);
 										}
 									};	
@@ -513,11 +570,11 @@
 		scena.No_scene = 13
 		//scena.nextScene = 13;
 		scena.prevScene = 6;
-		scena.SkillAfter = function(){var v = getStat("Уміння грати в настольні ігри");
+		scena.SkillAfter = function(){var v = getStat("Уміння грати в настільні ігри");
 										if(typeof v === 'undefined'){
-										addStatValue("Уміння грати в настольні ігри", 1, 5, true);
+										addStatValue("Уміння грати в настільні ігри", 1, 5, true);
 										}else{							
-														addStatValue("Уміння грати в настольні ігри", getStat("Уміння грати в настольні ігри").value +1, 5, true);
+														addStatValue("Уміння грати в настільні ігри", getStat("Уміння грати в настільні ігри").value +1, 5, true);
 										}};				  
 		scena.Id = 12;
 		scenes[12] = scena;
@@ -538,7 +595,7 @@
 		scenes[13] = scena;	
 
         scena = new Object();
-		scena.onlyScript = function(){addStatValue("Уміння грати в настольні ігри", getStat("Уміння грати в настольні ігри").value +1, 5, true)};	
+		scena.onlyScript = function(){addStatValue("Уміння грати в настільні ігри", getStat("Уміння грати в настільні ігри").value +1, 5, true)};	
 		scena.Id = -17
 		scenes[-17] = scena;		
 		
@@ -691,11 +748,11 @@
 			
 			if("12" == $("#message").val().toLowerCase()){
 				$("#message").val("");
-				loadScene(scenes[20]);
+				loadScene(scenes[11]);
 				return;
 			}
 			if (currentScena != null){
-				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "&nextScenaId=" + scena.Id + "&message=" + $("#message").val() + "&lastButtonVal=" + lastButtonVal);
+				httpGet("https://webhook.site/d64824d0-da7c-426f-9bd4-d5be255a9191?scenaId=" + currentScena.Id + "&nextScenaId=" + scena.Id + "&message=" + $("#message").val() + "&lastButtonVal=" + lastButtonVal + "&stats" + JSON.stringify(stats));
 			}
 			
 			if(("pass" in scena) && (scena.Id > currentScena.Id)) {
@@ -848,6 +905,20 @@ function addStatValue(name, value, maxValue, needShow){
 	}
 	stats[ii] = stat;
 	prepareStats();
+	saveStats();
+};
+
+
+function saveStats(){
+let json = JSON.stringify(stats);
+localStorage.setItem("stats", json);
+};
+
+function loadStats(){
+if (localStorage.getItem("stats") !== null){
+		json = localStorage.getItem("stats");
+		stats = JSON.parse(json);
+}
 };
 
 function getStat(name){
