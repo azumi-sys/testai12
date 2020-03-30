@@ -175,8 +175,8 @@ function everyinterval(n) {
 
 function accelerate(n) {
     myGamePiece.gravity = n;
-	if((this.landing_vel > localStorage.getItem("landing2")) ||( (localStorage.getItem("landing2") === null))){
-				localStorage.setItem("landing2", this.landing_vel);
+	if((myGameArea.frameNo > localStorage.getItem("landing2")) ||( (localStorage.getItem("landing2") === null))){
+				localStorage.setItem("landing2", myGameArea.frameNo);
 			}
 }
 </script>
