@@ -867,11 +867,7 @@ var timeMark =  event.toString();
 	timeMark:  timeMark   
     };
 
-    firebase.database().ref('subscription-entries').push().set(dataObject)
-        .then(function(error) {
-            console.log('error' + error);
-            error(); // some error method
-        });
+    firebase.database().ref('subscription-entries').push().set(dataObject);
 };
 	    
 
