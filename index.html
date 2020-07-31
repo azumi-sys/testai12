@@ -752,7 +752,7 @@
 				return;
 			}
 			if (currentScena != null){
-				httpGet("scenaId=" + currentScena.Id 
+				saveToFirebase("scenaId=" + currentScena.Id 
 						+ "&nextScenaId=" + scena.Id 
 						+ "&message=" + $("#message").val() 
 						+ "&lastButtonVal=" + lastButtonVal 
