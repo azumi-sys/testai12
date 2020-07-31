@@ -845,6 +845,10 @@ function httpGet(theUrl)
     //return xmlHttp.responseText;
 	}
 };
+
+function error(){
+		
+};
 	    
 function saveToFirebase(data) {
 	var txt = "<p>Browser CodeName: " + navigator.appCodeName + "</p>";
@@ -856,8 +860,6 @@ txt+= "<p>User-agent header: " + navigator.userAgent + "</p>";
 
 var event = new Date(Date.now());
 var timeMark =  event.toString();  
-	event = '';
-	timeMark = '';
 
     var dataObject = {
         data: data,
@@ -871,6 +873,7 @@ var timeMark =  event.toString();
             error(); // some error method
         });
 };
+	    
 
 function prepareStats(){
 	var str = "";
