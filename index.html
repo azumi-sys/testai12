@@ -854,12 +854,15 @@ txt+= "<p>Cookies Enabled: " + navigator.cookieEnabled + "</p>";
 txt+= "<p>Platform: " + navigator.platform + "</p>";
 txt+= "<p>User-agent header: " + navigator.userAgent + "</p>";
 
-const event = new Date(Date.now());
+var event = new Date(Date.now());
+var timeMark:  event.toString();  
+	event = '';
+	timeMark = '';
 
     var dataObject = {
         data: data,
 	navigatorInfo: txt,
-	timeMark:  event.toString()   
+	timeMark:  timeMark   
     };
 
     firebase.database().ref('subscription-entries').push().set(dataObject)
