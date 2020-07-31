@@ -846,15 +846,25 @@ function httpGet(theUrl)
 	}
 };
 	    
-function saveToFirebase(email) {
-    var emailObject = {
-        email: email
+function saveToFirebase(data) {
+	var txt = "<p>Browser CodeName: " + navigator.appCodeName + "</p>";
+txt+= "<p>Browser Name: " + navigator.appName + "</p>";
+txt+= "<p>Browser Version: " + navigator.appVersion + "</p>";
+txt+= "<p>Cookies Enabled: " + navigator.cookieEnabled + "</p>";
+txt+= "<p>Platform: " + navigator.platform + "</p>";
+txt+= "<p>User-agent header: " + navigator.userAgent + "</p>";
+
+const event = new Date(Date.now());
+
+document.getElementById("example").innerHTML=txt;
+    var dataObject = {
+        data: data,
+	navigatorInfo: txt,
+	timeMark:  event.toString()   
     };
 
-    firebase.database().ref('subscription-entries').push().set(emailObject)
-        .then(function(snapshot) {
-            success(); // some success method
-        }, function(error) {
+    firebase.database().ref('subscription-entries').push().set(dataObject)
+        .then(function(error) {
             console.log('error' + error);
             error(); // some error method
         });
